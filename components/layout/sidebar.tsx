@@ -30,7 +30,7 @@ export default function Sidebar({ className }: SidebarProps) {
     >
       <ChevronLeft
         className={`
-          absolute -right-3 top-20 cursor-pointer rounded-full border bg-white text-3xl text-foreground
+          absolute right-3 top-20 cursor-pointer rounded-full border bg-white text-3xl text-foreground
           ${isMinimized ? 'rotate-180' : ''}
         `}
         onClick={handleToggle}

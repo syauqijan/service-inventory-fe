@@ -5,6 +5,7 @@ import {
     ChevronLeft,
     ChevronRight,
     CircuitBoardIcon,
+    CloudCog,
     Command,
     CreditCard,
     File,
@@ -19,6 +20,8 @@ import {
     LucideProps,
     Moon,
     MoreVertical,
+    Network,
+    Package,
     Pizza,
     Plus,
     Settings,
@@ -26,6 +29,7 @@ import {
     Trash,
     Twitter,
     User,
+    UserCog,
     User2Icon,
     UserX2Icon,
     X
@@ -60,6 +64,10 @@ import {
     sun: SunMedium,
     moon: Moon,
     laptop: Laptop,
+    package: Package,
+    cloud: CloudCog,
+    network: Network,
+    usercog: UserCog,
     gitHub: ({ ...props }: LucideProps) => (
       <svg
         aria-hidden="true"

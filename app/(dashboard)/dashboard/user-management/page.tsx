@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import { UserTable } from '@/components/tables/user-tables/user-tables';
 import { ColumnDef } from '@tanstack/react-table';
@@ -5,6 +6,7 @@ import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Heading } from '@/components/ui/heading';
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
+import { CellAction } from '@/components/tables/user-tables/cell-actions';
 
 interface User {
   name: string;
@@ -30,8 +32,9 @@ const columns: ColumnDef<User, any>[] = [
   {
     accessorKey: 'actions',
     header: 'Actions',
-   
+    cell: () => <CellAction /> //TO DO: Add the correct data properties
   },
+
 ];
 
 const data: User[] = [

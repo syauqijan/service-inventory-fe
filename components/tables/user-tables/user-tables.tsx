@@ -288,7 +288,7 @@ export function UserTable<TData, TValue>({
           <div className="flex items-center space-x-2">
             <button
               aria-label="Go to first page"
-              className="hidden h-8 w-8 p-0 lg:flex outline outline-1 outline-slate-200 rounded-md items-center justify-center"
+              className="hidden h-8 w-8 p-0 lg:flex outline outline-1 outline-slate-200 rounded-md items-center justify-center cursor-pointer"
               onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage()}
             >
@@ -296,7 +296,7 @@ export function UserTable<TData, TValue>({
             </button>
             <button
               aria-label="Go to previous page"
-              className="flex h-8 w-8 p-0 outline outline-1 outline-slate-200 rounded-md items-center justify-center"
+              className="flex h-8 w-8 p-0 outline outline-1 outline-slate-200 rounded-md items-center justify-center cursor-pointer"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
@@ -304,7 +304,7 @@ export function UserTable<TData, TValue>({
             </button>
             <button
               aria-label="Go to next page"
-              className="flex h-8 w-8 p-0 outline outline-1 outline-slate-200 rounded-md items-center justify-center "
+              className="flex h-8 w-8 p-0 outline outline-1 outline-slate-200 rounded-md items-center justify-center cursor-pointer"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >
@@ -312,7 +312,7 @@ export function UserTable<TData, TValue>({
             </button>
             <button
               aria-label="Go to last page"
-              className="hidden h-8 w-8 p-0 lg:flex outline outline-1 outline-slate-200 rounded-md items-center justify-center"
+              className="hidden h-8 w-8 p-0 lg:flex outline outline-1 outline-slate-200 rounded-md items-center justify-center cursor-pointer"
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage()}
               

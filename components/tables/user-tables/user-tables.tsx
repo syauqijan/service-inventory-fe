@@ -285,6 +285,8 @@ export function UserTable<TData, TValue>({
             Page {table.getState().pagination.pageIndex + 1} of{' '}
             {table.getPageCount()}
           </div>
+
+          {/* TO DO : set different icons display for the first and last page */}
           <div className="flex items-center space-x-2">
             <button
               aria-label="Go to first page"

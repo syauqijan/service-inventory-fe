@@ -63,14 +63,14 @@ export function DashboardNav({
                     )}
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent
+                {/* <TooltipContent
                   align="center"
                   side="right"
                   sideOffset={8}
                   className={!isMinimized ? 'hidden' : 'inline-block'}
                 >
                   {item.title}
-                </TooltipContent>
+                </TooltipContent> */}
               </Tooltip>
             )
           );

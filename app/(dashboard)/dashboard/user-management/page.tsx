@@ -78,7 +78,7 @@ return (
           />
           <button
             onClick={handleAddNewClick}
-            className='w-[118px] h-10 px-4 py-2 bg-slate-900 rounded-md justify-center items-center inline-flex text-white text-sm font-medium'
+            className='w-[118px] h-10 px-4 py-2 bg-RedTint/900 rounded-md justify-center items-center inline-flex text-white text-sm font-medium'
           >
             <Plus className="mr-2 h-4 w-4" /> Add New
           </button>

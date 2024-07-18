@@ -197,7 +197,7 @@ export function UserTable<TData, TValue>({
       />
       <ScrollArea className="h-[calc(80vh-220px)] rounded-md border"> 
         <Table className="relative">
-          <TableHeader className='text-slate-600 text-sm font-medium uppercase leading-normal sticky top-0 bg-white z-10'>
+          <TableHeader className='text-slate-600 text-sm font-medium uppercase leading-normal sticky top-0 bg-white'>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {

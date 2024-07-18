@@ -7,7 +7,7 @@ interface HeadingProps {
     return (
       <div>
         <h2 className="text-slate-900 text-3xl font-semibold  tracking-tight ">{title}</h2>
-        <p className=" text-slate-500 text-sm font-normal  text-muted-foreground">{description}</p>
+        <p className=" text-slate-500 text-sm font-normal  text-muted-foreground pt-2">{description}</p>
       </div>
     );
   };

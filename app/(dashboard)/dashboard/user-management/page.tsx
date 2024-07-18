@@ -1,25 +1,23 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import { UserTable } from '@/components/tables/user-tables/user-tables';
 import { ColumnDef } from '@tanstack/react-table';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Heading } from '@/components/ui/heading';
 import { Plus } from 'lucide-react';
-import Link from 'next/link';
+import PopupUser from '@/components/popup/popup-user';
 import { CellAction } from '@/components/tables/user-tables/cell-actions';
 
 interface User {
   name: string;
   email: string;
   role: string;
-//   avatar?: string;
 }
 
 const columns: ColumnDef<User, any>[] = [
   {
     accessorKey: 'name',
     header: 'Name',
-    
   },
   {
     accessorKey: 'email',
@@ -34,7 +32,6 @@ const columns: ColumnDef<User, any>[] = [
     header: 'Actions',
     cell: () => <CellAction /> //TO DO: Add the correct data properties
   },
-
 ];
 
 const data: User[] = [
@@ -54,12 +51,22 @@ const data: User[] = [
   { name: 'Is Mail', email: 'imail@mail.com', role: 'Admin' },
   { name: 'Is Mail', email: 'imail@mail.com', role: 'Admin' },
 ];
+
 const breadcrumbItems = [
     { title: 'Main', link: '/dashboard' },
     { title: 'User Management', link: '/dashboard/user-management' }
   ];
   
-const page = () => {
+const Page = () => {
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+
+  const handleAddNewClick = () => {
+    setIsPopupVisible(true);
+  };
+
+  const handleClosePopup = () => {
+    setIsPopupVisible(false);
+  };
 return (
 <>
     <div className="flex-1 space-y-4  p-4 pt-6 md:p-8">
@@ -69,30 +76,27 @@ return (
             title="User Management"
             description="Create and manage user account"
           />
-
-          <Link
-            href={'/dashboard/user/new'}
+          <button
+            onClick={handleAddNewClick}
             className='w-[118px] h-10 px-4 py-2 bg-slate-900 rounded-md justify-center items-center inline-flex text-white text-sm font-medium'
           >
             <Plus className="mr-2 h-4 w-4" /> Add New
-          </Link>
+          </button>
         </div>
         <hr className="border-neutral-200" />
 
         <UserTable
-            columns={columns}
-            data={data}
-            searchKey="name"
-            pageNo={1}
-            totalUsers={data.length}
-            pageCount={1}
+          columns={columns}
+          data={data}
+          searchKey="name"
+          pageNo={1}
+          totalUsers={data.length}
+          pageCount={1}
         />
-    </div>
-</>
-
-
-
+      </div>
+      <PopupUser isVisible={isPopupVisible} onClose={handleClosePopup} />
+    </>
   );
 };
 
-export default page;
+export default Page;

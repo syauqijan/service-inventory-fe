@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -13,12 +13,45 @@ interface ValidationErrors {
     password?: string;
 }
 
+interface Role {
+    id: number;
+    name: string;
+  }
+
 const PopupUser: React.FC<PopupUserProps> = ({ isVisible, onClose }) => {
 const [email, setEmail] = useState<string>('');
 const [name, setName] = useState<string>('');
 const [password, setPassword] = useState<string>('');
-const [role, setRole] = useState<string>('Developer');
+const [roleId, setRoleId] = useState<number>(1);
+const [roles, setRoles] = useState<Role[]>([]);
 const [errors, setErrors] = useState<ValidationErrors>({});
+
+
+    const fetchRoles = async () => {
+      try {
+        const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT_ROLES || '', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Error fetching roles:', errorText);
+          return;
+        }
+
+        const result = await response.json();
+        setRoles(result);
+      } catch (error) {
+        console.error('Error fetching roles:', error);
+      }
+    };
+
+    useEffect(() => {
+        fetchRoles();
+        }, []);
 
 const validateEmail = (email: string): boolean => {
     const emailRegex = /^[\w-\.]+@phincon\.com$/;
@@ -62,7 +95,6 @@ const emptyForm = () => {
     setEmail('');
     setName('');
     setPassword('');
-    setRole('Developer');
     setErrors({});
 }
 const createSubmit = async () => {
@@ -74,7 +106,7 @@ const createSubmit = async () => {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, email, password, role }),
+        body: JSON.stringify({ name, email, password, roleId }),
         });
         if (response.ok) {
         console.log('User created');
@@ -216,11 +248,14 @@ return (
                         name="role"
                         id="role"
                         className="py-3 px-4 rounded-md border border-solid border-neutral-300 focus:outline-none focus:border-sky-900 w-full"
-                        value={role}
-                        onChange={(e) => setRole(e.target.value)}
+                        value={roleId}
+                        onChange={(e) => setRoleId(Number(e.target.value))}
                     >
-                        <option value="Developer">Developer</option>
-                        <option value="Manager">Project Manager</option>
+                        {roles.map((role) => (
+                        <option key={role.id} value={role.id}>
+                            {role.name}
+                        </option>
+                        ))}
                     </select>
                 </div>
             </div>

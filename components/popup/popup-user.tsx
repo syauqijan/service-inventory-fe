@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import dotenv from "dotenv";
-dotenv.config();
 
 interface PopupUserProps {
     isVisible: boolean;
@@ -35,13 +33,6 @@ const validatePassword = (password: string): boolean => {
     return passwordRegex.test(password);
 };
 
-const emptyFields = () => {
-    setName('');
-    setEmail('');
-    setPassword('');
-    setRole('Developer');
-}
-
 const validateForm = (): boolean => {
     let err: ValidationErrors = {};
     let isValid = true;
@@ -69,7 +60,7 @@ const createSubmit = async () => {
     const formIsValid = validateForm();
     if (formIsValid) {
     try {
-        const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT_USERS || '', {
+        const response = await fetch('http://localhost:8000/users', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -78,7 +69,6 @@ const createSubmit = async () => {
         });
         if (response.ok) {
         console.log('User created');
-        emptyFields();
         onClose();
         } else {
         console.error('Failed to create user');

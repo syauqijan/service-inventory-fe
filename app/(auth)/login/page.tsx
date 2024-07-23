@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import logoImage from '@/public/login-image.svg'
 import logoPlaceholder from '@/public/logo.svg'
-import dotenv from 'dotenv';
-dotenv.config();
 
 const Login = () => {
   const router = useRouter();
@@ -17,7 +15,7 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT_LOGIN || '', {
+      const response = await fetch('http://localhost:8000/login', {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',

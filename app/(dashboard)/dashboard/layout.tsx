@@ -1,5 +1,6 @@
 import Header from '@/components/layout/header';
 import Sidebar from '@/components/layout/sidebar';
+import PrivateRoute from '@/components/private-route';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -17,7 +18,9 @@ export default function DashboardLayout({
       <Header />
       <div className="flex h-screen overflow-hidden">
         <Sidebar />
+        {/* <PrivateRoute> */}
         <main className="flex-1 overflow-hidden pt-16">{children}</main>
+        {/* </PrivateRoute> */}
       </div>
     </>
   );

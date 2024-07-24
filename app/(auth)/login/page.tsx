@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import logoImage from '@/public/login-image.svg'
 import logoPlaceholder from '@/public/logo.svg'
+import Telkomsel from '@/public/telkomsel.svg'
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -39,16 +40,16 @@ const Login = () => {
         <div className=''>
           <Image src={logoImage} width={375} height={375} alt='logo-image'/>
         </div>
-        <div className='w-[418px] flex-col justify-center items-start self-center gap-2.5 inline-flex'>
-          <form onSubmit={handleSubmit}>
+        <div className='w-[418px] flex-col justify-center items-start inline-flex'>
+          <form onSubmit={handleSubmit} className='w-full'>
 
           <Image src={logoPlaceholder} width={150} height={50} alt='logo-image'/>
 
-          <div className='text-2xl font-semibold pt-2'>
+          <div className='text-2xl font-semibold mt-4 mb-2'>
             Login
           </div>
-          <div className='w-full flex-col justify-start items-start gap-1.5'>
-            <label htmlFor="email" className='text-sm font-medium'>Email</label>
+          <div className='w-full flex-col justify-start items-start mb-4 '>
+            <label htmlFor="email" className='text-sm font-medium '>Email</label>
             <input 
               type="email"
               value={email}
@@ -56,7 +57,7 @@ const Login = () => {
               placeholder='Enter your email' name="email" id="email" className='w-full border border-slate-300 rounded-md self-stretch pl-3 py-2' />
 
           </div>
-          <div className='w-full'>
+          <div className='w-full flex-col justify-start items-start mb-6'>
             <label htmlFor="password" className='text-sm font-medium'>Password</label>
             <input 
               type="password" 

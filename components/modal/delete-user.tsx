@@ -33,7 +33,7 @@ const DeleteUser: React.FC<DeleteUserProps> = ({ isVisible, onClose, onConfirm }
             Cancel
         </button>
         <button
-            className="active:scale-95 form-flex justify-center items-center font-normal border py-3 px-4 gap-2 cursor-pointer rounded-md shadow-sm text-white bg-black w-16 m-3"
+            className="active:scale-95 form-flex justify-center items-center font-normal border py-3 px-4 gap-2 cursor-pointer rounded-md shadow-sm text-white bg-RedTint/900 w-16 m-3"
             onClick={onConfirm}
         >
             Yes

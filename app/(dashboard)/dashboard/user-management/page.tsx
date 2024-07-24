@@ -32,31 +32,31 @@ const Page = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT_USERS || '', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+  const fetchData = async () => {
+    try {
+      const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT_USERS || '', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Error fetching users:', errorText);
-          setError('Failed to fetch users');
-          return;
-        }
-
-        const result = await response.json();
-        setData(result);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-        setError('An error occurred while fetching users');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error fetching users:', errorText);
+        setError('Failed to fetch users');
+        return;
       }
-    };
 
+      const result = await response.json();
+      setData(result);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      setError('An error occurred while fetching users');
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -164,7 +164,7 @@ const Page = () => {
           pageCount={1}
         />
       </div>
-      <PopupUser isVisible={isPopupVisible} onClose={handleClosePopup} />
+      <PopupUser isVisible={isPopupVisible} onClose={handleClosePopup} onCreate={fetchData} />
       <DeleteUser
         isVisible={isModalDeleteVisible}
         onClose={handleCloseDeleteModal}
@@ -174,7 +174,8 @@ const Page = () => {
         isVisible={isModalUpdateVisible} 
         onClose={handleCloseUpdateModal} 
         user={selectedUser}
-         />
+        onUpdate={fetchData}
+      />
 
     </>
   );

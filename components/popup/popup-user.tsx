@@ -6,6 +6,7 @@ dotenv.config();
 interface PopupUserProps {
     isVisible: boolean;
     onClose: () => void;
+    onCreate: () => void; 
 }
 
 interface ValidationErrors {
@@ -19,13 +20,14 @@ interface Role {
     name: string;
   }
 
-const PopupUser: React.FC<PopupUserProps> = ({ isVisible, onClose }) => {
+const PopupUser: React.FC<PopupUserProps> = ({ isVisible, onClose, onCreate }) => {
     const [email, setEmail] = useState<string>('');
     const [name, setName] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [roleId, setRoleId] = useState<number>(1);
     const [roles, setRoles] = useState<Role[]>([]);
     const [errors, setErrors] = useState<ValidationErrors>({});
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
 
     const fetchRoles = async () => {
@@ -101,27 +103,31 @@ const PopupUser: React.FC<PopupUserProps> = ({ isVisible, onClose }) => {
     const createSubmit = async () => {
         const formIsValid = validateForm();
         if (formIsValid) {
-        try {
-            const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT_USERS||'', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ name, email, password, roleId }),
-            });
-            if (response.ok) {
-            console.log('User created');
-            emptyForm();
-            onClose();
-            toast.success('New user created successfully');
-            } else {
+            setIsLoading(true);
+            try {
+                const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT_USERS||'', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, email, password, roleId }),
+                });
+                if (response.ok) {
+                console.log('User created');
+                emptyForm();
+                onClose();
+                onCreate();
+                toast.success('New user created successfully');
+                } else {
+                    toast.error('New user created error');
+                    console.error('Failed to create user');
+                }
+            } catch (error) {
                 toast.error('New user created error');
-                console.error('Failed to create user');
+                console.error('Error:', error);
+            } finally {
+                setIsLoading(false);
             }
-        } catch (error) {
-            toast.error('New user created error');
-            console.error('Error:', error);
-        }
         }
     };
 
@@ -267,10 +273,11 @@ return (
         </form>
         <div className="flex justify-end mt-4">
             <button
-            className="active:scale-95 min-w-16 form-flex justify-center items-center border py-3 px-4 gap-2 cursor-pointer rounded-md shadow-sm text-white bg-red-600 w-1/5 mt-3 mb-1 ml-3 font-semibold"
+            className="active:scale-95 min-w-[22px] form-flex justify-center items-center text-center border py-3 px-2 gap-2 cursor-pointer rounded-md shadow-sm text-white bg-red-600 w-1/5 mt-3 mb-1  font-semibold"
             onClick={createSubmit}
+            disabled={isLoading}
             >
-            Save
+            {isLoading ? 'Loading...' : 'Save'}
             </button>
         </div>
         </div>

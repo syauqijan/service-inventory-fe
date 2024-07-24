@@ -238,7 +238,7 @@ export function UserTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  There is no data to display
                 </TableCell>
               </TableRow>
             )}

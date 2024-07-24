@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {toast} from "sonner";
 import dotenv from 'dotenv';
+import { Eye, EyeOff } from 'lucide-react';
 dotenv.config();
 
 
@@ -30,19 +31,23 @@ interface Role {
     name: string;
   }
 
-const PopupUpdateUser: React.FC<PopupUpdateUserProps> = ({ isVisible, onClose, user}) => {
+const PopupUpdateUser: React.FC<PopupUpdateUserProps> = ({ isVisible, onClose, user, onUpdate}) => {
     const [email, setEmail] = useState<string>('');
     const [name, setName] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [roleId, setRoleId] = useState<number>(1);
     const [roles, setRoles] = useState<Role[]>([]);
     const [errors, setErrors] = useState<ValidationErrors>({});
+    const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
 
     useEffect(() => {
         if (user) {
           setName(user.name);
           setEmail(user.email);
           setRoleId(user.roleId);
+          setPassword(user.password);
         }
       }, [user]);
 
@@ -119,32 +124,37 @@ const PopupUpdateUser: React.FC<PopupUpdateUserProps> = ({ isVisible, onClose, u
     const handleUpdate = async () => {
         const formIsValid = validateForm();
         if (formIsValid&& user) {
-        try {
-            let updatedPassword = password;
-            if(password === ''){
-                updatedPassword = user.password;
-            }
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT_USERS}/${user.id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ name, email, updatedPassword, roleId }),
-            });
-            console.log()
-            if (response.ok) {
-            console.log('User updated');
-            emptyForm();
-            onClose();
-            toast.success('User updated successfully');
-            } else {
+            setIsLoading(true);
+
+            try {
+                let updatedPassword = password;
+                if(password === ''){
+                    updatedPassword = user.password;
+                }
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT_USERS}/${user.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, email, password: updatedPassword, roleId }),
+                });
+                console.log()
+                if (response.ok) {
+                console.log('User updated');
+                emptyForm();
+                onClose();
+                onUpdate();
+                toast.success('User updated successfully');
+                } else {
+                    toast.error('User updated error');
+                    console.error('Failed to update user');
+                }
+            } catch (error) {
                 toast.error('User updated error');
-                console.error('Failed to update user');
+                console.error('Error:', error);
+            } finally {
+                setIsLoading(false);
             }
-        } catch (error) {
-            toast.error('User updated error');
-            console.error('Error:', error);
-        }
         }
     };
 
@@ -189,7 +199,7 @@ return (
                     type="text"
                     id="createname"
                     name="createname"
-                    placeholder={user?.name || 'Name'}
+                    placeholder='New Name'
                     className={`${
                     errors.name
                         ? 'focus:border-red-400 border-red-400'
@@ -217,7 +227,7 @@ return (
                     type="text"
                     id="Createemail"
                     name="Createemail"
-                    placeholder={user?.email || 'Email'}
+                    placeholder='New Email'
                     className={`${
                     errors.email
                         ? 'focus:border-red-400 border-red-400'
@@ -240,20 +250,27 @@ return (
                     Password
                 </label>
                 </div>
-                <div className="ml-3 w-4/5">
+                <div className="ml-3 w-4/5 relative">
                 <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     id="Createpass"
                     name="Createpass"
-                    placeholder="Password"
+                    placeholder="New Password"
                     className={`${
                     errors.password
                         ? 'focus:border-red-400 border-red-400'
                         : 'focus:border-sky-900'
-                    } emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-full`}
+                    } emailcustom placeholder:opacity-50 py-3 pl-4 pr-9 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-full`}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
+                <button
+                    type="button"
+                    className="absolute right-3 top-3"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className='text-neutral-300 w-5'/> : <Eye className='text-neutral-300 w-5'/>}
+                  </button>
                 {errors.password && (
                     <p className="text-xs text-red-500 mt-1">
                     {errors.password}
@@ -290,10 +307,11 @@ return (
         </form>
         <div className="flex justify-end mt-4">
             <button
-            className="active:scale-95 min-w-16 form-flex justify-center items-center border py-3 px-4 gap-2 cursor-pointer rounded-md shadow-sm text-white bg-red-600 w-1/5 mt-3 mb-1 ml-3 font-semibold"
+            className="active:scale-95 min-w-[22px] form-flex justify-center items-center text-center border py-3 px-2 gap-2 cursor-pointer rounded-md shadow-sm text-white bg-red-600 w-1/5 mt-3 mb-1  font-semibold"
             onClick={handleUpdate}
+            disabled={isLoading}
             >
-            Save
+            {isLoading ? 'Loading...' : 'Save'}
             </button>
         </div>
         </div>

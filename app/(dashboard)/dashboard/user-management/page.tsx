@@ -7,6 +7,7 @@ import { Heading } from '@/components/ui/heading';
 import { Plus } from 'lucide-react';
 import PopupUser from '@/components/popup/popup-user';
 import DeleteUser from '@/components/modal/delete-user';
+import UpdateUser from '@/components/popup/update-user';
 import { CellAction } from '@/components/tables/user-tables/cell-actions';
 import {toast} from 'sonner'
 interface User {
@@ -26,6 +27,7 @@ const breadcrumbItems = [
 const Page = () => {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [isModalDeleteVisible, setIsModalDeleteVisible] = useState(false);
+  const [isModalUpdateVisible, setIsModalUpdateVisible] = useState(false);
   const [data, setData] = useState<User[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -75,6 +77,17 @@ const Page = () => {
     setIsModalDeleteVisible(false);
     setSelectedUser(null);
   };
+
+  const handleUpdateUser = (user: User) => {
+    setSelectedUser(user);
+    setIsModalUpdateVisible(true);
+  };
+
+  const handleCloseUpdateModal = () => {
+    setIsModalUpdateVisible(false);
+    setSelectedUser(null);
+  };
+
   const columns: ColumnDef<User, any>[] = [
     {
       accessorKey: 'name',
@@ -91,7 +104,7 @@ const Page = () => {
     {
       accessorKey: 'actions',
       header: 'Actions',
-      cell: (props) => <CellAction onDelete={() => handleDeleteUser(props.row.original)} />, // Pass the correct data properties
+      cell: (props) => <CellAction onDelete={() => handleDeleteUser(props.row.original)} onUpdate={() => handleUpdateUser(props.row.original)} />, // Pass the correct data properties
     },
   ];
   const handleConfirmDelete = async () => {
@@ -123,6 +136,7 @@ const Page = () => {
       }
     }
   };
+
 
   return (
     <>
@@ -156,6 +170,11 @@ const Page = () => {
         onClose={handleCloseDeleteModal}
         onConfirm={handleConfirmDelete}
       />
+      <UpdateUser 
+        isVisible={isModalUpdateVisible} 
+        onClose={handleCloseUpdateModal} 
+        user={selectedUser}
+         />
 
     </>
   );

@@ -20,110 +20,110 @@ interface Role {
   }
 
 const PopupUser: React.FC<PopupUserProps> = ({ isVisible, onClose }) => {
-const [email, setEmail] = useState<string>('');
-const [name, setName] = useState<string>('');
-const [password, setPassword] = useState<string>('');
-const [roleId, setRoleId] = useState<number>(1);
-const [roles, setRoles] = useState<Role[]>([]);
-const [errors, setErrors] = useState<ValidationErrors>({});
+    const [email, setEmail] = useState<string>('');
+    const [name, setName] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+    const [roleId, setRoleId] = useState<number>(1);
+    const [roles, setRoles] = useState<Role[]>([]);
+    const [errors, setErrors] = useState<ValidationErrors>({});
 
 
     const fetchRoles = async () => {
-      try {
+        try {
         const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT_ROLES || '', {
-          method: 'GET',
-          headers: {
+            method: 'GET',
+            headers: {
             'Content-Type': 'application/json',
-          },
+            },
         });
 
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Error fetching roles:', errorText);
-          return;
+            const errorText = await response.text();
+            console.error('Error fetching roles:', errorText);
+            return;
         }
 
         const result = await response.json();
         setRoles(result);
-      } catch (error) {
+        } catch (error) {
         console.error('Error fetching roles:', error);
-      }
+        }
     };
 
     useEffect(() => {
         fetchRoles();
         }, []);
 
-const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[\w-\.]+@phincon\.com$/;
-    return emailRegex.test(email);
-};
+    const validateEmail = (email: string): boolean => {
+        const emailRegex = /^[\w-\.]+@phincon\.com$/;
+        return emailRegex.test(email);
+    };
 
-const validateName = (name: string): boolean => {
-    const nameRegex = /^.{1,30}$/;
-    return nameRegex.test(name);
-};
+    const validateName = (name: string): boolean => {
+        const nameRegex = /^.{1,30}$/;
+        return nameRegex.test(name);
+    };
 
-const validatePassword = (password: string): boolean => {
-    const passwordRegex = /^.{8,}$/;
-    return passwordRegex.test(password);
-};
+    const validatePassword = (password: string): boolean => {
+        const passwordRegex = /^.{8,}$/;
+        return passwordRegex.test(password);
+    };
 
-const validateForm = (): boolean => {
-    let err: ValidationErrors = {};
-    let isValid = true;
+    const validateForm = (): boolean => {
+        let err: ValidationErrors = {};
+        let isValid = true;
 
-    if (!validateEmail(email)) {
-    err.email = 'Email is invalid';
-    isValid = false;
-    }
-
-    if (!validateName(name)) {
-    err.name = 'Name is invalid';
-    isValid = false;
-    }
-
-    if (!validatePassword(password)) {
-    err.password = 'Password is invalid';
-    isValid = false;
-    }
-
-    setErrors(err);
-    return isValid;
-};
-
-const emptyForm = () => {
-    setEmail('');
-    setName('');
-    setPassword('');
-    setErrors({});
-}
-const createSubmit = async () => {
-    const formIsValid = validateForm();
-    if (formIsValid) {
-    try {
-        const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT_USERS||'', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, password, roleId }),
-        });
-        if (response.ok) {
-        console.log('User created');
-        emptyForm();
-        onClose();
-        toast.success('New user created successfully');
-        } else {
-            toast.error('New user created error');
-        console.error('Failed to create user');
+        if (!validateEmail(email)) {
+        err.email = 'Email is invalid';
+        isValid = false;
         }
-    } catch (error) {
-        toast.error('New user created error');
-        console.error('Error:', error);
+
+        if (!validateName(name)) {
+        err.name = 'Name is invalid';
+        isValid = false;
+        }
+
+        if (!validatePassword(password)) {
+        err.password = 'Password is invalid';
+        isValid = false;
+        }
+
+        setErrors(err);
+        return isValid;
+    };
+
+    const emptyForm = () => {
+        setEmail('');
+        setName('');
+        setPassword('');
+        setErrors({});
     }
-    }
-};
+    const createSubmit = async () => {
+        const formIsValid = validateForm();
+        if (formIsValid) {
+        try {
+            const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT_USERS||'', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name, email, password, roleId }),
+            });
+            if (response.ok) {
+            console.log('User created');
+            emptyForm();
+            onClose();
+            toast.success('New user created successfully');
+            } else {
+                toast.error('New user created error');
+                console.error('Failed to create user');
+            }
+        } catch (error) {
+            toast.error('New user created error');
+            console.error('Error:', error);
+        }
+        }
+    };
 
 return (
     <>

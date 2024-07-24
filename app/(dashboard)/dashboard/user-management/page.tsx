@@ -6,8 +6,9 @@ import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Heading } from '@/components/ui/heading';
 import { Plus } from 'lucide-react';
 import PopupUser from '@/components/popup/popup-user';
+import DeleteUser from '@/components/modal/delete-user';
 import { CellAction } from '@/components/tables/user-tables/cell-actions';
-
+import {toast} from 'sonner'
 interface User {
   id: number;
   name: string;
@@ -17,26 +18,6 @@ interface User {
   } | null;
 }
 
-const columns: ColumnDef<User, any>[] = [
-  {
-    accessorKey: 'name',
-    header: 'Name',
-  },
-  {
-    accessorKey: 'email',
-    header: 'Email',
-  },
-  {
-    accessorKey: 'role.name', // Nested accessor for role name
-    header: 'Role',
-  },
-  {
-    accessorKey: 'actions',
-    header: 'Actions',
-    cell: () => <CellAction />, // TODO: Add the correct data properties
-  },
-];
-
 const breadcrumbItems = [
   { title: 'Main', link: '/dashboard' },
   { title: 'User Management', link: '/dashboard/user-management' },
@@ -44,8 +25,10 @@ const breadcrumbItems = [
 
 const Page = () => {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [isModalDeleteVisible, setIsModalDeleteVisible] = useState(false);
   const [data, setData] = useState<User[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -83,6 +66,64 @@ const Page = () => {
     setIsPopupVisible(false);
   };
 
+  const handleDeleteUser = (user: User) => {
+    setSelectedUser(user);
+    setIsModalDeleteVisible(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setIsModalDeleteVisible(false);
+    setSelectedUser(null);
+  };
+  const columns: ColumnDef<User, any>[] = [
+    {
+      accessorKey: 'name',
+      header: 'Name',
+    },
+    {
+      accessorKey: 'email',
+      header: 'Email',
+    },
+    {
+      accessorKey: 'role.name',
+      header: 'Role',
+    },
+    {
+      accessorKey: 'actions',
+      header: 'Actions',
+      cell: (props) => <CellAction onDelete={() => handleDeleteUser(props.row.original)} />, // Pass the correct data properties
+    },
+  ];
+  const handleConfirmDelete = async () => {
+    if (selectedUser) {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT_USERS}/${selectedUser.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Error deleting user:', errorText);
+          setError('Failed to delete user');
+          return;
+        }
+
+        setData(data.filter(user => user.id !== selectedUser.id));
+        handleCloseDeleteModal();
+        toast.success('User deleted successfully');
+        
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        setError('An error occurred while deleting user');
+        toast.error('User deleted error');
+
+      }
+    }
+  };
+
   return (
     <>
       <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
@@ -110,6 +151,12 @@ const Page = () => {
         />
       </div>
       <PopupUser isVisible={isPopupVisible} onClose={handleClosePopup} />
+      <DeleteUser
+        isVisible={isModalDeleteVisible}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+      />
+
     </>
   );
 };

@@ -1,25 +1,26 @@
 import { useState, useEffect } from 'react';
+import { decodeToken } from './auth';
 import { useRouter } from 'next/navigation';
 
-const useAuth = () => {
+interface User {
+    name: string;
+    email: string;
+    userId: string;
+}
+
+export default function useAuth() {
     const [authToken, setAuthToken] = useState<string | null>(null);
+    const [user, setUser] = useState<User | null>(null);
     const router = useRouter();
 
     useEffect(() => {
         const token = localStorage.getItem('authToken');
-        const expiryTime = localStorage.getItem('tokenExpiryTime');
-
-        if (token && expiryTime) {
-            const currentTime = new Date().getTime();
-            if (currentTime >= parseInt(expiryTime, 10)) {
-                logout();
-            } else {
-                setAuthToken(token);
-                const timeout = parseInt(expiryTime, 10) - currentTime;
-                setTimeout(() => {
-                    logout();
-                }, timeout);
-            }
+        if (token) {
+        setAuthToken(token);
+        const decoded = decodeToken(token);
+        if (decoded) {
+            setUser({ name: decoded.name, email: decoded.email, userId: decoded.userId });
+        }
         }
     }, []);
 
@@ -28,20 +29,24 @@ const useAuth = () => {
         localStorage.setItem('authToken', token);
         localStorage.setItem('tokenExpiryTime', expiryTime.toString());
         setAuthToken(token);
+        const decoded = decodeToken(token);
+        if (decoded) {
+        setUser({ name: decoded.name, email: decoded.email, userId: decoded.userId });
+        }
     };
 
     const logout = () => {
         localStorage.removeItem('authToken');
         localStorage.removeItem('tokenExpiryTime');
         setAuthToken(null);
+        setUser(null);
         router.push('/login');
     };
 
     return {
         authToken,
+        user,
         login,
-        logout
+        logout,
     };
-};
-
-export default useAuth;
+}

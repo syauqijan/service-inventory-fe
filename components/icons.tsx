@@ -16,6 +16,7 @@ import {
     LayoutDashboardIcon,
     Loader2,
     LogIn,
+    LogOut,
     LucideIcon,
     LucideProps,
     Moon,
@@ -68,6 +69,7 @@ import {
     cloud: CloudCog,
     network: Network,
     usercog: UserCog,
+    logout: LogOut,
     gitHub: ({ ...props }: LucideProps) => (
       <svg
         aria-hidden="true"

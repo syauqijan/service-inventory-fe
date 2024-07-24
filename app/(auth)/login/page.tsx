@@ -43,7 +43,7 @@ const Login = () => {
         <div className='w-[418px] flex-col justify-center items-start inline-flex'>
           <form onSubmit={handleSubmit} className='w-full'>
 
-          <Image src={logoPlaceholder} width={150} height={50} alt='logo-image'/>
+          <Image src={Telkomsel} width={150} height={50} alt='logo-image'/>
 
           <div className='text-2xl font-semibold mt-4 mb-2'>
             Login

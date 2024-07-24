@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import {toast} from "sonner";
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -112,10 +113,13 @@ const createSubmit = async () => {
         console.log('User created');
         emptyForm();
         onClose();
+        toast.success('New user created successfully');
         } else {
+            toast.error('New user created error');
         console.error('Failed to create user');
         }
     } catch (error) {
+        toast.error('New user created error');
         console.error('Error:', error);
     }
     }

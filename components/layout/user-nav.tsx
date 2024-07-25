@@ -37,13 +37,13 @@ return (
     </DropdownMenuTrigger>
     <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuSeparator />
-        <DropdownMenuGroup>
+        <DropdownMenuGroup className='cursor-pointer'>
         <DropdownMenuItem>
             My Account
         </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={logout} className='flex flex-row'>
+        <DropdownMenuItem onClick={logout} className='flex flex-row cursor-pointer'>
         <LogOut className='mr-2' />
         Log out
         </DropdownMenuItem>

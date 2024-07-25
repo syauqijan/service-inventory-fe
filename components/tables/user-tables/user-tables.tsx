@@ -6,11 +6,11 @@ import {
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
   useReactTable
 } from '@tanstack/react-table';
 import React from 'react';
 import { Input } from '@/components/ui/input';
-
 import {
   Select,
   SelectContent,
@@ -122,37 +122,11 @@ export function UserTable<TData, TValue>({
     onPaginationChange: setPagination,
     getPaginationRowModel: getPaginationRowModel(),
     manualPagination: true,
-    manualFiltering: true
+    manualFiltering: true,
+    getSortedRowModel: getSortedRowModel()
   });
 
   const searchValue = table.getColumn(searchKey)?.getFilterValue() as string;
-
-  // React.useEffect(() => {
-  //   if (debounceValue.length > 0) {
-  //     router.push(
-  //       `${pathname}?${createQueryString({
-  //         [selectedOption.value]: `${debounceValue}${
-  //           debounceValue.length > 0 ? `.${filterVariety}` : ""
-  //         }`,
-  //       })}`,
-  //       {
-  //         scroll: false,
-  //       }
-  //     )
-  //   }
-
-  //   if (debounceValue.length === 0) {
-  //     router.push(
-  //       `${pathname}?${createQueryString({
-  //         [selectedOption.value]: null,
-  //       })}`,
-  //       {
-  //         scroll: false,
-  //       }
-  //     )
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [debounceValue, filterVariety, selectedOption.value])
 
   React.useEffect(() => {
     if (searchValue?.length > 0) {
@@ -187,17 +161,17 @@ export function UserTable<TData, TValue>({
 
   return (
     <>
-      <Input
+      {/* <Input
         placeholder={`Search ${searchKey}`}
         value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ''}
         onChange={(event) =>
           table.getColumn(searchKey)?.setFilterValue(event.target.value)
         }
         className="w-full md:max-w-sm"
-      />
-      <ScrollArea className="h-[calc(80vh-220px)] rounded-md border"> 
+      /> */}
+      <ScrollArea className="h-[calc(80vh-220px)] rounded-md border">
         <Table className="relative">
-          <TableHeader className='text-slate-600 text-sm font-medium uppercase leading-normal sticky top-0 bg-white'>
+          <TableHeader className="text-slate-600 text-sm font-medium uppercase leading-normal sticky top-0 bg-white">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -238,7 +212,7 @@ export function UserTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  There is no data to display
                 </TableCell>
               </TableRow>
             )}
@@ -286,7 +260,6 @@ export function UserTable<TData, TValue>({
             {table.getPageCount()}
           </div>
 
-          {/* TO DO : set different icons display for the first and last page */}
           <div className="flex items-center space-x-2">
             <button
               aria-label="Go to first page"
@@ -317,7 +290,6 @@ export function UserTable<TData, TValue>({
               className="hidden h-8 w-8 p-0 lg:flex outline outline-1 outline-slate-200 rounded-md items-center justify-center cursor-pointer"
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage()}
-              
             >
               <DoubleArrowRightIcon className="h-4 w-4" aria-hidden="true" />
             </button>

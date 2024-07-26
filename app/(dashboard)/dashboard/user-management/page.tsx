@@ -13,6 +13,7 @@ import { CellAction } from '@/components/tables/user-tables/cell-actions';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { SkeletonTable } from '@/components/tables/skeleton-tables';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface User {
   id: number;
@@ -36,17 +37,25 @@ const Page = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [searchTerm, setSearchTerm] = useState<string>(''); // Add search term state
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [page, setPage] = useState<number>(1);
+  const [limit, setLimit] = useState<number>(10);
+  const [totalUsers, setTotalUsers] = useState<number>(0);
+
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT_USERS || '', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_ENDPOINT_USERS}?search=${debouncedSearchTerm}&page=${page}&limit=${limit}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -56,7 +65,8 @@ const Page = () => {
       }
 
       const result = await response.json();
-      setData(result);
+      setData(result.users);
+      setTotalUsers(result.total);
     } catch (error) {
       console.error('Error fetching users:', error);
       setError('An error occurred while fetching users');
@@ -67,7 +77,7 @@ const Page = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [debouncedSearchTerm, page, limit]);
 
   const handleAddNewClick = () => {
     setIsPopupVisible(true);
@@ -151,12 +161,15 @@ const Page = () => {
   const handleConfirmDelete = async () => {
     if (selectedUser) {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT_USERS}/${selectedUser.id}`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_ENDPOINT_USERS}/${selectedUser.id}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
 
         if (!response.ok) {
           const errorText = await response.text();
@@ -176,19 +189,15 @@ const Page = () => {
     }
   };
 
-  const filteredData = data.filter(
-    (user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.role && user.role.name.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
   return (
     <>
       <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
         <Breadcrumbs items={breadcrumbItems} />
         <div className="flex items-start justify-between">
-          <Heading title="User Management" description="Create and manage user account" />
+          <Heading
+            title="User Management"
+            description="Create and manage user account"
+          />
           <button
             onClick={handleAddNewClick}
             className="w-[118px] h-10 px-4 py-2 bg-RedTint/900 rounded-md justify-center items-center inline-flex text-white text-sm font-medium"
@@ -198,29 +207,34 @@ const Page = () => {
         </div>
         <hr className="border-neutral-200" />
 
-        <Input
-          placeholder="Search user"
-          value={searchTerm}
-          onChange={(e: any) => setSearchTerm(e.target.value)}
-          className="w-full md:max-w-sm mb-4"
-        />
-
         {error && <div className="text-red-500">{error}</div>}
+
+        <Input
+          placeholder="Search"
+          value={searchTerm}
+          className="w-full md:max-w-sm mb-4"
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
 
         {loading ? (
           <SkeletonTable />
         ) : (
           <UserTable
             columns={columns}
-            data={filteredData}
+            data={data}
             searchKey="name"
-            pageNo={1}
-            totalUsers={filteredData.length}
-            pageCount={1}
+            pageNo={page}
+            totalUsers={totalUsers}
+            pageCount={Math.ceil(totalUsers / limit)}
+            pageSizeOptions={[10, 20, 30, 40, 50]}
           />
         )}
       </div>
-      <PopupUser isVisible={isPopupVisible} onClose={handleClosePopup} onCreate={fetchData} />
+      <PopupUser
+        isVisible={isPopupVisible}
+        onClose={handleClosePopup}
+        onCreate={fetchData}
+      />
       <DeleteUser
         isVisible={isModalDeleteVisible}
         onClose={handleCloseDeleteModal}
@@ -228,8 +242,9 @@ const Page = () => {
       />
       <UpdateUser
         isVisible={isModalUpdateVisible}
-        onClose={handleCloseUpdateModal} 
-        user={selectedUser} />
+        onClose={handleCloseUpdateModal}
+        user={selectedUser}
+      />
     </>
   );
 };

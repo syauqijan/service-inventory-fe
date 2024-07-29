@@ -13,9 +13,10 @@ import { CellAction } from '@/components/tables/user-tables/cell-actions';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { SkeletonTable } from '@/components/tables/skeleton-tables';
-import { useDebounce } from '@/hooks/useDebounce';
+import { useDebounce } from '@/hooks/useDebounce'; 
+import {getColumns} from '@/components/tables/user-tables/columns';
 
-interface User {
+export interface User {
   id: number;
   name: string;
   email: string;
@@ -107,57 +108,6 @@ const Page = () => {
     setSelectedUser(null);
   };
 
-  const columns: ColumnDef<User, any>[] = [
-    {
-      accessorKey: 'name',
-      header: ({ column }) => (
-        <div className="flex items-center justify-between">
-          Name
-          <button
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="ml-2 flex flex-row gap-0"
-          >
-            <MoveUp className="w-4" />
-            <MoveDown className="w-4" />
-          </button>
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'email',
-      header: ({ column }) => (
-        <div className="flex items-center justify-between">
-          Email
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'role.name',
-      header: ({ column }) => (
-        <div className="flex items-center justify-between">
-          Role
-          <button
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="ml-2 flex flex-row gap-0"
-          >
-            <MoveUp className="w-4" />
-            <MoveDown className="w-4" />
-          </button>
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'actions',
-      header: 'Actions',
-      cell: (props) => (
-        <CellAction
-          onDelete={() => handleDeleteUser(props.row.original)}
-          onUpdate={() => handleUpdateUser(props.row.original)}
-        />
-      ),
-    },
-  ];
-
   const handleConfirmDelete = async () => {
     if (selectedUser) {
       try {
@@ -220,7 +170,7 @@ const Page = () => {
           <SkeletonTable />
         ) : (
           <UserTable
-            columns={columns}
+            columns={getColumns(handleDeleteUser, handleUpdateUser)}
             data={data}
             searchKey="name"
             pageNo={page}
@@ -244,6 +194,7 @@ const Page = () => {
         isVisible={isModalUpdateVisible}
         onClose={handleCloseUpdateModal}
         user={selectedUser}
+        onUpdate={fetchData}
       />
     </>
   );

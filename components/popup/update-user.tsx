@@ -47,7 +47,7 @@ const PopupUpdateUser: React.FC<PopupUpdateUserProps> = ({ isVisible, onClose, u
           setName(user.name);
           setEmail(user.email);
           setRoleId(user.roleId);
-          setPassword(user.password);
+        //   setPassword(user.password);
         }
       }, [user]);
 
@@ -123,34 +123,38 @@ const PopupUpdateUser: React.FC<PopupUpdateUserProps> = ({ isVisible, onClose, u
     }
     const handleUpdate = async () => {
         const formIsValid = validateForm();
-        if (formIsValid&& user) {
+        if (formIsValid && user) {
             setIsLoading(true);
-
+    
             try {
-                let updatedPassword = password;
-                if(password === ''){
-                    updatedPassword = user.password;
+                const updateData: { name: string; email: string; roleId: number; password?: string } = {
+                    name,
+                    email,
+                    roleId
+                };
+                if (password !== '') {
+                    updateData.password = password;
                 }
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT_USERS}/${user.id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name, email, password: updatedPassword, roleId }),
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updateData),
                 });
-                console.log()
+    
                 if (response.ok) {
-                console.log('User updated');
-                emptyForm();
-                onClose();
-                onUpdate();
-                toast.success('User updated successfully');
+                    console.log('User updated');
+                    emptyForm();
+                    onClose();
+                    onUpdate();
+                    toast.success('User updated successfully');
                 } else {
-                    toast.error('User updated error');
+                    toast.error('User update error');
                     console.error('Failed to update user');
                 }
             } catch (error) {
-                toast.error('User updated error');
+                toast.error('User update error');
                 console.error('Error:', error);
             } finally {
                 setIsLoading(false);

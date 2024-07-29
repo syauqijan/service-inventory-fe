@@ -20,6 +20,8 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  password: string; 
+  roleId: number; 
   role: {
     name: string;
   } | null;
@@ -102,7 +104,11 @@ const Page = () => {
   };
 
   const handleUpdateUser = (user: User) => {
-    setSelectedUser(user);
+    setSelectedUser({
+      ...user,
+      password: user.password || '', // Initialize with default values
+      roleId: user.roleId || 0       // Initialize with default values
+    });
     setIsModalUpdateVisible(true);
   };
 

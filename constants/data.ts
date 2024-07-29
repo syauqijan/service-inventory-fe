@@ -116,12 +116,12 @@ export const navItems: NavItem[] = [
     icon: 'dashboard',
     label: 'Dashboard'
   },
-  {
-    title: 'Project',
-    href: '/dashboard/project',
-    icon: 'package',
-    label: 'project'
-  },
+  // {
+  //   title: 'Project',
+  //   href: '/dashboard/project',
+  //   icon: 'package',
+  //   label: 'project'
+  // },
   {
     title: 'Service',
     href: '/dashboard/service',
@@ -140,10 +140,10 @@ export const navItems: NavItem[] = [
     icon: 'usercog',
     label: 'user-management'
   },
-  {
-    title: 'Login',
-    href: '/',
-    icon: 'login',
-    label: 'login'
-  }
+  // {
+  //   title: 'Login',
+  //   href: '/',
+  //   icon: 'login',
+  //   label: 'login'
+  // }
 ];

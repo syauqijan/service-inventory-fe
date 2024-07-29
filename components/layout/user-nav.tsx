@@ -35,16 +35,16 @@ return (
         </div>
         </button>
     </DropdownMenuTrigger>
-    <DropdownMenuContent className="w-56" align="end" forceMount>
+    <DropdownMenuContent className="w-56 " align="end" forceMount>
         <DropdownMenuSeparator />
         <DropdownMenuGroup className='cursor-pointer'>
-        <DropdownMenuItem>
+        <DropdownMenuItem className='text-slate-700 text-sm font-semibold hover:bg-slate-100 pb-2 pt-2 rounded-md'>
             My Account
         </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={logout} className='flex flex-row cursor-pointer'>
-        <LogOut className='mr-2' />
+        <DropdownMenuItem onClick={logout} className='flex flex-row pb-1 pt-1 mb-1 cursor-pointer items-center text-slate-700 text-sm font-medium hover:bg-slate-100 rounded-md'>
+        <LogOut className='mr-2 w-4 ' />
         Log out
         </DropdownMenuItem>
     </DropdownMenuContent>

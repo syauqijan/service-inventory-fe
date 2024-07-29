@@ -5,7 +5,6 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Heading } from '@/components/ui/heading';
 import { Plus } from 'lucide-react';
-import { MoveDown, MoveUp } from 'lucide-react';
 import PopupUser from '@/components/popup/popup-user';
 import DeleteUser from '@/components/modal/delete-user';
 import UpdateUser from '@/components/popup/update-user';
@@ -15,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { SkeletonTable } from '@/components/tables/skeleton-tables';
 import { useDebounce } from '@/hooks/useDebounce'; 
 import {getColumns} from '@/components/tables/user-tables/columns';
+import { useSearchParams } from 'next/navigation';
 
 export interface User {
   id: number;
@@ -39,11 +39,14 @@ const Page = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [totalUsers, setTotalUsers] = useState<number>(0);
+  const searchParams = useSearchParams();
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  // const page = Number(searchParams.get('page') ?? '1');
+  // const limit = Number(searchParams.get('limit') ?? '10');
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
-  const [totalUsers, setTotalUsers] = useState<number>(0);
 
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   const fetchData = async () => {
     setLoading(true);

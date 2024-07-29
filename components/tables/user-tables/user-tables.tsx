@@ -68,9 +68,6 @@ export function UserTable<TData, TValue>({
   const perPageAsNumber = Number(per_page);
   const fallbackPerPage = isNaN(perPageAsNumber) ? 10 : perPageAsNumber;
 
-  /* this can be used to get the selectedrows 
-  console.log("value", table.getFilteredSelectedRowModel()); */
-
   // Create query string
   const createQueryString = React.useCallback(
     (params: Record<string, string | number | null>) => {
@@ -109,6 +106,14 @@ export function UserTable<TData, TValue>({
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageIndex, pageSize]);
+
+  React.useEffect(() => {
+    setPagination({
+      pageIndex: fallbackPage - 1,
+      pageSize: fallbackPerPage
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fallbackPage, fallbackPerPage]);
 
   const table = useReactTable({
     data,
@@ -161,14 +166,6 @@ export function UserTable<TData, TValue>({
 
   return (
     <>
-      {/* <Input
-        placeholder={`Search ${searchKey}`}
-        value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ''}
-        onChange={(event) =>
-          table.getColumn(searchKey)?.setFilterValue(event.target.value)
-        }
-        className="w-full md:max-w-sm"
-      /> */}
       <ScrollArea className="h-[calc(80vh-220px)] rounded-md border">
         <Table className="relative">
           <TableHeader className="text-slate-600 text-sm font-medium uppercase leading-normal sticky top-0 bg-white">
@@ -223,10 +220,6 @@ export function UserTable<TData, TValue>({
 
       <div className="flex flex-col items-center justify-end gap-2 space-x-2 py-4 sm:flex-row">
         <div className="flex w-full items-center justify-between">
-          {/* <div className="flex-1 text-sm text-muted-foreground">
-            {table.getFilteredSelectedRowModel().rows.length} of{' '}
-            {table.getFilteredRowModel().rows.length} row(s) selected.
-          </div> */}
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
             <div className="flex items-center space-x-2">
               <p className="whitespace-nowrap text-sm font-medium">

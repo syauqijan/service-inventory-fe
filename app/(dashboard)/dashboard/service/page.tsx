@@ -189,6 +189,12 @@ const Page = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
+                <Input
+                placeholder="Search service"
+                value={searchTerm}
+                className="w-full md:max-w-sm mb-4"
+                onChange={(e) => setSearchTerm(e.target.value)}
+                />
             </div>
 
             {/* {loading ? (

@@ -88,7 +88,7 @@ const Page = () => {
             <hr className="border-neutral-200" />
 
             {error && <div className="text-red-500">{error}</div>}
-            <div className='flex flex-row'>
+            <div className='relative flex flex-row'>
                 {/* <div className='flex justify-center items-center'> */}
                     <Tabs defaultValue="web" className="space-y-4 w-full">
                         <TabsList>
@@ -112,7 +112,7 @@ const Page = () => {
 
                     </Tabs>
                 {/* </div> */}
-                {/* <div className='flex flex-row justify-center items-center gap-6'>
+                <div className='absolute right-0 flex flex-row justify-center items-center gap-6'>
                     <button className='cursor-pointer'>
                         <Trash className="w-6 h-6 text-gray-500 " />
                     </button>
@@ -122,7 +122,7 @@ const Page = () => {
                     className="w-[250px] md:max-w-sm"
                     onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                </div> */}
+                </div>
             </div>
 
             {/* {loading ? (
@@ -139,12 +139,7 @@ const Page = () => {
             />
             )} */}
         </div>
-        {/* <PopupUser
-            isVisible={isPopupVisible}
-            onClose={handleClosePopup}
-            onCreate={fetchData}
-        />
-        <DeleteUser
+        {/* <DeleteUser
             isVisible={isModalDeleteVisible}
             onClose={handleCloseDeleteModal}
             onConfirm={handleConfirmDelete}

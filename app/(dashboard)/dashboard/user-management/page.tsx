@@ -106,8 +106,8 @@ const Page = () => {
   const handleUpdateUser = (user: User) => {
     setSelectedUser({
       ...user,
-      password: user.password || '', // Initialize with default values
-      roleId: user.roleId || 0       // Initialize with default values
+      password: user.password || '',
+      roleId: user.roleId || 0      
     });
     setIsModalUpdateVisible(true);
   };

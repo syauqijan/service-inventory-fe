@@ -44,10 +44,9 @@ const PopupUpdateUser: React.FC<PopupUpdateUserProps> = ({ isVisible, onClose, u
 
     useEffect(() => {
         if (user) {
-          setName(user.name);
-          setEmail(user.email);
-          setRoleId(user.roleId);
-        //   setPassword(user.password);
+            setName(user.name);
+            setEmail(user.email);
+            setRoleId(user.roleId);
         }
       }, [user]);
 

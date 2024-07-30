@@ -1,4 +1,3 @@
-// components/tables/user-tables/columns.tsx
 import { ColumnDef } from '@tanstack/react-table';
 import { MoveDown, MoveUp } from 'lucide-react';
 import { CellAction } from './cell-actions';

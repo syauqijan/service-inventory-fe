@@ -68,7 +68,6 @@ export function UserTable<TData, TValue>({
   const perPageAsNumber = Number(per_page);
   const fallbackPerPage = isNaN(perPageAsNumber) ? 10 : perPageAsNumber;
 
-  // Create query string
   const createQueryString = React.useCallback(
     (params: Record<string, string | number | null>) => {
       const newSearchParams = new URLSearchParams(searchParams?.toString());
@@ -86,7 +85,6 @@ export function UserTable<TData, TValue>({
     [searchParams]
   );
 
-  // Handle server-side pagination
   const [{ pageIndex, pageSize }, setPagination] =
     React.useState<PaginationState>({
       pageIndex: fallbackPage - 1,
@@ -104,7 +102,6 @@ export function UserTable<TData, TValue>({
       }
     );
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageIndex, pageSize]);
 
   React.useEffect(() => {
@@ -112,7 +109,7 @@ export function UserTable<TData, TValue>({
       pageIndex: fallbackPage - 1,
       pageSize: fallbackPerPage
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [fallbackPage, fallbackPerPage]);
 
   const table = useReactTable({
@@ -161,7 +158,6 @@ export function UserTable<TData, TValue>({
 
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchValue]);
 
   return (

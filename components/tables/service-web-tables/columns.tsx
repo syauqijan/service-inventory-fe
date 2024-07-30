@@ -1,17 +1,17 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { MoveDown, MoveUp } from 'lucide-react';
 import { CellAction } from './cell-actions';
-import { User } from '@/app/(dashboard)/dashboard/user-management/page';
+import { Service } from '@/app/(dashboard)/dashboard/service/page';
 
 export const getColumns = (
-  handleDeleteUser: (user: User) => void,
-  handleUpdateUser: (user: User) => void
-): ColumnDef<User, any>[] => [
+  handleDeleteService: (service: Service) => void,
+  handleUpdateService: (service: Service) => void
+): ColumnDef<Service, any>[] => [
   {
-    accessorKey: 'Service Name',
+    accessorKey: 'name',
     header: ({ column }) => (
       <div className="flex items-center justify-between">
-        Name
+        Service Name
         <button
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           className="ml-2 flex flex-row gap-0"
@@ -24,19 +24,20 @@ export const getColumns = (
   },
   {
     accessorKey: 'gitlabURL',
-    header: ({ column }) => (
-      <div className="flex items-center justify-between">
-        Email
-      </div>
+    header: 'gitlabURL',
+    cell: ({ row }) => (
+      <a href={row.original.gitlabURL} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+        {row.original.gitlabURL}
+      </a>
     ),
   },
   {
-    accessorKey: 'view_detail',
+    id: 'actions',
     header: 'Actions',
-    cell: (props) => (
+    cell: ({ row }) => (
       <CellAction
-        onDelete={() => handleDeleteUser(props.row.original)}
-        onUpdate={() => handleUpdateUser(props.row.original)}
+        onDelete={() => handleDeleteService(row.original)}
+        onUpdate={() => handleUpdateService(row.original)}
       />
     ),
   },

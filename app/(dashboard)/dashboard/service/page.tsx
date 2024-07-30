@@ -5,6 +5,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Heading } from '@/components/ui/heading';
 import { Plus, Trash } from 'lucide-react';
+import { Plus, Trash } from 'lucide-react';
 import PopupUser from '@/components/popup/popup-user';
 import DeleteUser from '@/components/modal/delete-user';
 import UpdateUser from '@/components/popup/update-user';
@@ -14,9 +15,11 @@ import { Input } from '@/components/ui/input';
 import { SkeletonTable } from '@/components/tables/skeleton-tables';
 import { useDebounce } from '@/hooks/useDebounce'; 
 import {getColumns} from '@/components/tables/service-web-tables/columns';
+import {getColumns} from '@/components/tables/service-web-tables/columns';
 import { useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
+import { WebServiceTable } from '@/components/tables/service-web-tables/service-tables';
 import { WebServiceTable } from '@/components/tables/service-web-tables/service-tables';
 
 const breadcrumbItems = [
@@ -27,7 +30,7 @@ const breadcrumbItems = [
 export interface Service {
     id: string;
     name: string;
-    gitlabUrl: string;
+    gitlabURL: string;
   }
 
 const Page = () => {

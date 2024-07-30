@@ -19,7 +19,7 @@ export default function DashboardLayout({
       <div className="flex h-screen overflow-hidden">
         <Sidebar />
         {/* <PrivateRoute> */}
-        <main className="flex-1 overflow-auto pt-16">{children}</main>
+        <main className="flex-1 overflow-hidden pt-16">{children}</main>
         {/* </PrivateRoute> */}
       </div>
     </>

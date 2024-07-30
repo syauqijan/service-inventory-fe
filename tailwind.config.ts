@@ -15,6 +15,7 @@ const config: Config = {
       },
       colors: {
         'RedTint/900':'#D3332B',
+        'Primary':'#3758F9',
 
       },
     },

@@ -28,7 +28,7 @@ const TableBody = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tbody
     ref={ref}
-    className={`[_&>tr:last-child]:border-0 ${className || ''}`}
+    className={`[_&>tr:last-child]:border-0 text-slate/900 ${className || ''}`}
     {...props}
   />
 ));

@@ -38,7 +38,7 @@ const Page = () => {
     var userIDform = user?.userId;
     const createSubmit = async () => {
         setIsLoading(true);
-        const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICE||'', {
+        const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES||'', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

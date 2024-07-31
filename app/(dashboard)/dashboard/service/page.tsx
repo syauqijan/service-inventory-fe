@@ -27,18 +27,19 @@ const breadcrumbItems = [
 export interface Service {
     id: string;
     name: string;
-    gitlabURL: string;
+    gitlabUrl: string;
   }
 
 const Page = () => {
     const [isPopupVisible, setIsPopupVisible] = useState(false);
     const [isModalDeleteVisible, setIsModalDeleteVisible] = useState(false);
     const [isModalUpdateVisible, setIsModalUpdateVisible] = useState(false);
+    const [data, setData] = useState<Service[]>([]);
     const [error, setError] = useState<string | null>(null);
-    // const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [selectedService, setSelectedService] = useState<Service | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [searchTerm, setSearchTerm] = useState<string>('');
-    const [totalUsers, setTotalUsers] = useState<number>(0);
+    const [totalServices, setTotalServices] = useState<number>(0);
     const searchParams = useSearchParams();
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
     // const page = Number(searchParams.get('page') ?? '1');
@@ -50,24 +51,86 @@ const Page = () => {
         setIsPopupVisible(true);
     };
     const handleDeleteService = (service:any) => {
-        // Implement delete logic
         console.log('Delete service:', service);
-      };
+    };
+
+    const handleUpdateService = (service:any) => {
+    console.log('Update service:', service);
+    };
+
+    const columns = getColumns(handleDeleteService, handleUpdateService);
     
-      const handleUpdateService = (service:any) => {
-        // Implement update logic
-        console.log('Update service:', service);
-      };
-    
-      const columns = getColumns(handleDeleteService, handleUpdateService);
-    
-    const webServicesDummyData: Service[] = [
-        { id: '1', name: 'service-browse-family-plan', gitlabURL: 'https://github.com/Kiranism/next-shadcn-dashboard-starter...' },
-        { id: '2', name: 'service-user-management', gitlabURL: 'https://github.com/Kiranism/user-management-service...' },
-        { id: '3', name: 'service-billing', gitlabURL: 'https://github.com/Kiranism/billing-service...' },
-        { id: '4', name: 'service-authentication', gitlabURL: 'https://github.com/Kiranism/auth-service...' },
-        { id: '5', name: 'service-notifications', gitlabURL: 'https://github.com/Kiranism/notification-service...' },
-      ];
+    // const webServicesDummyData: Service[] = [
+    //     { id: '1', name: 'service-browse-family-plan', gitlabURL: 'https://github.com/Kiranism/next-shadcn-dashboard-starter...' },
+    //     { id: '2', name: 'service-user-management', gitlabURL: 'https://github.com/Kiranism/user-management-service...' },
+    //     { id: '3', name: 'service-billing', gitlabURL: 'https://github.com/Kiranism/billing-service...' },
+    //     { id: '4', name: 'service-authentication', gitlabURL: 'https://github.com/Kiranism/auth-service...' },
+    //     { id: '5', name: 'service-notifications', gitlabURL: 'https://github.com/Kiranism/notification-service...' },
+    // ];
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}?search=${debouncedSearchTerm}&page=${page}&limit=${limit}`,
+            {
+                method: 'GET',
+                headers: {
+                'Content-Type': 'application/json',
+                },
+            }
+            );
+
+            if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error fetching services:', errorText);
+            setError('Failed to fetch services');
+            return;
+            }
+
+            const result = await response.json();
+            setData(result.services);
+            setTotalServices(result.total);
+            console.log('Services:', result.services);
+        } catch (error) {
+            console.error('Error fetching services:', error);
+            setError('An error occurred while fetching services');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, [debouncedSearchTerm, page, limit]);
+
+    const deleteService = async (service: Service) => {
+        try {
+            const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}/${service.id}`,
+            {
+                method: 'DELETE',
+                headers: {
+                'Content-Type': 'application/json',
+                },
+            }
+            );
+
+            if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error deleting service:', errorText);
+            toast.error('Failed to delete service');
+            return;
+            }
+
+            toast.success('Service deleted successfully');
+            fetchData();
+        } catch (error) {
+            console.error('Error deleting service:', error);
+            toast.error('An error occurred while deleting service');
+        }
+    }
+
     return (
         <>
         <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
@@ -87,8 +150,7 @@ const Page = () => {
             </div>
             <hr className="border-neutral-200" />
 
-            {error && <div className="text-red-500">{error}</div>}
-            <div className='flex flex-row'>
+            <div className='relative flex flex-row'>
                 {/* <div className='flex justify-center items-center'> */}
                     <Tabs defaultValue="web" className="space-y-4 w-full">
                         <TabsList>
@@ -96,15 +158,19 @@ const Page = () => {
                             <TabsTrigger value="api">API</TabsTrigger>
                         </TabsList>
                         <TabsContent value="web">
+                            {loading ? (
+                            <SkeletonTable />
+                            ) : (
                             <WebServiceTable
                                 columns={columns}
-                                data={webServicesDummyData}
+                                data={data}
                                 searchKey="name"
-                                pageNo={1}
-                                totalItems={webServicesDummyData.length}
-                                pageCount={1}
+                                pageNo={page}
+                                totalItems={totalServices}
+                                pageCount={Math.ceil(totalServices / limit)}
                                 pageSizeOptions={[10, 20, 30, 40, 50]}
                             />
+                            )}
                         </TabsContent>
                         <TabsContent value="api">
                             <p>API</p>
@@ -112,17 +178,17 @@ const Page = () => {
 
                     </Tabs>
                 {/* </div> */}
-                {/* <div className='flex flex-row justify-center items-center gap-6'>
+                <div className='absolute w-auto right-0 flex flex-row justify-center items-center gap-6'>
                     <button className='cursor-pointer'>
                         <Trash className="w-6 h-6 text-gray-500 " />
                     </button>
                     <Input
                     placeholder="Search service"
                     value={searchTerm}
-                    className="w-[250px] md:max-w-sm"
+                    className="w-[250px] md:max-w-sm text-slate/900"
                     onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                </div> */}
+                </div>
             </div>
 
             {/* {loading ? (
@@ -139,12 +205,7 @@ const Page = () => {
             />
             )} */}
         </div>
-        {/* <PopupUser
-            isVisible={isPopupVisible}
-            onClose={handleClosePopup}
-            onCreate={fetchData}
-        />
-        <DeleteUser
+        {/* <DeleteUser
             isVisible={isModalDeleteVisible}
             onClose={handleCloseDeleteModal}
             onConfirm={handleConfirmDelete}

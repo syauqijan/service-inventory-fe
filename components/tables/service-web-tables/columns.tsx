@@ -1,11 +1,11 @@
+import React from 'react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ColumnDef } from '@tanstack/react-table';
 import { MoveDown, MoveUp, Copy } from 'lucide-react';
-import { CellAction } from './cell-actions';
 import { Service } from '@/app/(dashboard)/dashboard/service/page';
-import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 
-// make function to copy text to clipboard
+// function to copy text to clipboard
 const copyToClipboard = (text: string) => {
   navigator.clipboard.writeText(text);
   toast.success('Copied to clipboard');
@@ -13,21 +13,38 @@ const copyToClipboard = (text: string) => {
 
 export const getColumns = (
   handleDeleteService: (service: Service) => void,
-  handleUpdateService: (service: Service) => void
+  handleUpdateService: (service: Service) => void,
+  selectedIds: string[], // Add selectedIds as parameter
+  setSelectedIds: React.Dispatch<React.SetStateAction<string[]>> // Add setSelectedIds as parameter
 ): ColumnDef<Service, any>[] => [
   {
     id: 'select',
     header: ({ table }) => (
       <Checkbox
         checked={table.getIsAllPageRowsSelected()}
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        onCheckedChange={(value) => {
+          table.toggleAllPageRowsSelected(!!value);
+          if (value) {
+            const allIds = table.getRowModel().rows.map(row => row.original.id);
+            setSelectedIds(allIds);
+          } else {
+            setSelectedIds([]);
+          }
+        }}
         aria-label="Select all"
       />
     ),
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        onCheckedChange={(value) => {
+          row.toggleSelected(!!value);
+          if (value) {
+            setSelectedIds(prev => [...prev, row.original.id]);
+          } else {
+            setSelectedIds(prev => prev.filter(id => id !== row.original.id));
+          }
+        }}
         aria-label="Select row"
       />
     ),
@@ -43,7 +60,7 @@ export const getColumns = (
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           className="ml-2 flex flex-row gap-0"
         >
-          <MoveUp className="w-4" /> 
+          <MoveUp className="w-4" />
           <MoveDown className="w-4" />
         </button>
       </div>
@@ -67,10 +84,6 @@ export const getColumns = (
     id: 'actions',
     header: '',
     cell: ({ row }) => (
-      // <CellAction
-      //   onDelete={() => handleDeleteService(row.original)}
-      //   onUpdate={() => handleUpdateService(row.original)}
-      // />
       <button className='text-gray-500'>
         View Detail
       </button>

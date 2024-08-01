@@ -4,7 +4,8 @@ import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Heading } from '@/components/ui/heading';
 import { useRouter } from 'next/navigation';
 import useAuth from '@/hooks/useAuth';
-import {toast} from "sonner";
+
+
 const breadcrumbItems = [
     { title: 'Main', link: '/dashboard' },
     { title: 'Service', link: '/dashboard/service' },
@@ -15,54 +16,98 @@ interface Status {
     statusName: string;
   }  
 
+interface ValidationErrors {
+    name?: string;
+    gitlabUrl?: string;
+    description?: string;
+    preprodUrl?: string;
+    prodUrl?: string;
+}
+
+  var i1 = 0;
+  var i2 = 0;
+
 const Page = () => {
+    const { user } = useAuth();
     const router = useRouter();
     const [isChecked, setIsChecked] = useState(false)
     const [isChecked2, setIsChecked2] = useState(false)
-
-    const [userId, setUserId] = useState<string>('');
+    const userId = user?.userId;
     const [gitlabUrl, setGitlabUrl] = useState<string>('');
     const [name, setName] = useState<string>('');
     const [description, setDescription] = useState<string>('');
     const [preprodUrl, setPreprodUrl] = useState<string>('');
-    const [preprodUrlStatus, setPreprodUrlStatus] = useState<string>('');
+    const [preprodUrlStatus, setPreprodUrlStatus] = useState<string>('inactive');
     const [prodUrl, setProdUrl] = useState<string>('');
-    const [prodUrlStatus, setProdUrlStatus] = useState<string>('');
-
-
+    const [prodUrlStatus, setProdUrlStatus] = useState<string>('inactive');
+    const [errors, setErrors] = useState<ValidationErrors>({});
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const createSubmit = async () => {
-        try{
-            setIsLoading(true);
-            const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES||'', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ 
-                    name, gitlabUrl, description, preprodUrl, preprodUrlStatus,
-                    prodUrl, prodUrlStatus, userId
-                }),
-            });
-            toast.success('Service created successfully');
-            if (response.ok) {
-                console.log('Service Created', prodUrlStatus, preprodUrlStatus);
-            } else {
-                console.error('Failed to create service');
-            }
+    const validateForm = () => {
+        let err: ValidationErrors = {};
+        let isValid = true;
+        if (!name) {
+          err.name = 'Service name must be filled';
+          isValid = false;
         }
-        catch{
+        if (!gitlabUrl) {
+          err.gitlabUrl = 'URL must be filled';
+          isValid = false;
+        }
+        if (!description) {
+          err.description = 'Description must be filled';
+          isValid = false;
+        }
+        if (!preprodUrl) {
+          err.preprodUrl = 'URL must be filled';
+          isValid = false;
+        }
+        if (!prodUrl) {
+          err.prodUrl = 'URL must be filledd';
+          isValid = false;
+        }
+        setErrors(err);
+        return isValid;
+    }
+    const createSubmit = async () => {
+        setIsLoading(true);
+        const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES||'', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+            name, gitlabUrl, description, preprodUrl, preprodUrlStatus,
+            prodUrl, prodUrlStatus, userId
+         }),
+        });
+        if (response.ok) {
+        console.log('Service Created', prodUrlStatus, preprodUrlStatus);
+        } else {
             console.error('Failed to create service');
         }
     };
 
     const handleCheckboxChange = () => {
-        setIsChecked(!isChecked)
+        setIsChecked(!isChecked);
+        i1++;
+        if(i1 / 2 == 0){
+            setProdUrlStatus('inactive');
+        }
+        else{
+            setProdUrlStatus('active');
+        };
       }
     
     const handleCheckboxChange2 = () => {
         setIsChecked2(!isChecked2)
-      }
+        i2++;
+        if(i2 / 2 == 0){
+            setPreprodUrlStatus('inactive');
+        }
+        else{
+            setPreprodUrlStatus('active');
+        };
+    }
 
     return(
         <div className='flex max-h-screen overflow-y-auto '>
@@ -79,32 +124,24 @@ const Page = () => {
                     <form>
                         <div className='w-2/5'>
                             <h3 className='font-medium mb-1'>Service Name</h3>
-                            <h3 className='font-medium mb-1'>Service Name</h3>
                             <input type="text" id="Updateemail" name="Updateemail" value={name} onChange={(e) => setName(e.target.value)}
                             placeholder="Enter Service Name" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" required/>
                         </div>                        
-                        <div className='w-2/5'>
+                        <div className=' mt-3'>
+                            <h3 className='font-medium mb-1'>Description</h3>
+                            <textarea id="Updateemail" name="Updateemail" value={description} onChange={(e) => setDescription(e.target.value)}
+                            placeholder="Enter description" className="min-h-20 max-h-20 emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-1/2" required></textarea>
+                        </div>
+                        <div className='w-2/5 mt-1'>
                             <h3 className='font-medium mb-1'>Gitlab url</h3>
                             <input type="text" id="Updateemail" name="Updateemail" value={gitlabUrl} onChange={(e) => setGitlabUrl(e.target.value)}
-                            placeholder="Enter Service Name" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" required/>
+                            placeholder="Enter link" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" required/>
                         </div>
-                        <div className='w-2/5'>
-                            <h3 className='font-medium mb-1'>User ID</h3>
-                            <input type="text" id="Updateemail" name="Updateemail" value={userId} onChange={(e) => setUserId(e.target.value)}
-                            placeholder="Enter Service Name" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" required/>
-                        </div>
-                        <div className='mt-4'>
-                            <h3 className='font-medium mb-1'>Description</h3>
-                            
-                            <input type="text" id="Updateemail" name="Updateemail" value={description} onChange={(e) => setDescription(e.target.value)}
-                            placeholder="Enter Link" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" required/>
-                        </div>
-
                         <div className='mt-3 flex justify-center w-1/2'>
                             <div className='w-4/5'>
                                 <h3 className='font-medium mb-1'>Pre-Prod URL</h3>
                                 <input type="text" id="Updateemail" name="Updateemail" value={preprodUrl} onChange={(e) => setPreprodUrl(e.target.value)}
-                                placeholder="Enter Link" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" required/>
+                                placeholder="Enter link" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" required/>
                             </div>
                             <div className='w-1/5'>
                                 <p className='mb-2 ml-1 font-medium'>
@@ -128,10 +165,10 @@ const Page = () => {
                                 </label>
                             </div>
                         </div>
-                        <div className='mt-6 flex justify-center w-1/2'>
+                        <div className='mt-3 flex justify-center w-1/2'>
                             <div className='w-4/5'>
                                 <h3 className='font-medium mb-1'>Production URL</h3>
-                                <input type="text" id="Updateemail" name="Updateemail" placeholder="Enter Link" value={prodUrl} onChange={(e) => setProdUrl(e.target.value)}
+                                <input type="text" id="Updateemail" name="Updateemail" placeholder="Enter link" value={prodUrl} onChange={(e) => setProdUrl(e.target.value)}
                                 className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" required/>
                             </div>
                             <div className='w-1/5'>

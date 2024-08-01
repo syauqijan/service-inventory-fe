@@ -17,6 +17,10 @@ const config: Config = {
         'RedTint/900':'#D3332B',
         'Primary':'#3758F9',
         'slate/900': '#0F172A',
+        'red/200': '#FECACA',
+        'red/600': '#DC2626',
+        'green/200': '#BBF7D0',
+        'green/600': '#16A34A',
 
       },
     },

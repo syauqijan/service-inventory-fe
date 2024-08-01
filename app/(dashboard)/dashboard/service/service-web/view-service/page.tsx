@@ -1,108 +1,146 @@
-// 'use client';
-// import React, { useState } from 'react';
-// import { Breadcrumbs } from '@/components/breadcrumbs';
-// import { Heading } from '@/components/ui/heading';
-// import { ArrowUpRight, SquarePen  } from 'lucide-react';
-// import { UserTable } from '@/components/tables/service-detail-tables/service-details-tables';
-// import { ColumnDef } from '@tanstack/react-table';
+'use client';
+import React, { useState, useEffect } from 'react';
+import { Breadcrumbs } from '@/components/breadcrumbs';
+import { Heading } from '@/components/ui/heading';
+import { ArrowUpRight, SquarePen, Copy } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ServiceDetailTable } from '@/components/tables/service-web-detail-tables/service-detail-tables';
+import { ColumnDef } from '@tanstack/react-table';
+import {columns} from '@/components/tables/service-web-detail-tables/columns';
+import { toast } from 'sonner';
+import { URL } from '@/components/tables/service-web-detail-tables/columns';
 
-// interface User {
-//     name: string;
-//     url: string;
-//     status: string;
-//   }
-  
-//   const columns: ColumnDef<User, any>[] = [
-//     {
-//       accessorKey: 'name',
-//       header: 'Name',
-//     },
-//     {
-//       accessorKey: 'url',
-//       header: 'URL',
-//     },
-//     {
-//       accessorKey: 'status',
-//       header: 'Status',
-//     },
-//   ];
-  
-//   const data: User[] = [
-//     { name: 'Pre-Prod URL', url: 'https://github.com/Kiranism/next-shadcn-dashboard-starter', status: 'Inactive' },
-//     { name: 'Production URL', url: 'https://github.com/Kiranism/next-shadcn-dashboard-starter', status: 'Active' },
-//   ];
+interface Service {
+    id: string;
+    name: string;
+    gitlabUrl: string;
+    description: string;
+    preprodUrl: string;
+    preprodUrlStatus: string;
+    prodUrl: string;
+    prodUrlStatus: string;
+    createdAt: string;
+    updatedAt: string;
+    userId: string;
+    user: {
+        name: string;
+    };
+}
 
 
-// const breadcrumbItems = [
-//     { title: 'Main', link: '/dashboard' },
-//     { title: 'Service', link: '/dashboard/service' },
-//     { title: 'Service Detail', link: '/dashboard/service-detail' }
-//   ];
+const breadcrumbItems = [
+    { title: 'Main', link: '/dashboard' },
+    { title: 'Service', link: '/dashboard/service' },
+    { title: 'Service Detail', link: '/dashboard/service-detail' }
+];
 
-// const page = () => {
-//     return(
-//         <div>
-//             <div className="flex-1 space-y-4  p-4 md:p-8">
-//                     <Breadcrumbs items={breadcrumbItems} />
-//                     <div className="flex items-start justify-between">
-//                         <Heading
-//                             title="Service Detail"
-//                             description="Service web detail"
-//                         />
-//                             <button className="flex justify-center items-center py-2 gap-2 cursor-pointer rounded-md shadow-sm text-white bg-red-600 w-24">
-//                                 <SquarePen className='h-5 w-5 font-medium'/>
-//                                 Edit
-//                             </button>
-//                     </div>
-//                     <hr className="border-neutral-200" />
-//                     <div className='flex justify-center text-sm'>
-//                         <div className='w-4/5 pt-2 pr-80'>
-//                             <div>
-//                                 <h3 className='font-medium'>Service Name</h3>
-//                                 <p className='font-normal'>Service-browse-family-plan</p>
-//                             </div>
-//                             <div className='mt-6'>
-//                                 <h3 className='font-medium'>Description</h3>
-//                                 <p className='font-normal mt-2'>Fugiat ipsum ipsum deserunt culpa aute sint do nostrud anim incididunt cillum culpa consequat. Excepteur qui ipsum aliquip consequat sint. Sit id mollit nulla mollit nostrud in ea officia proident.</p>
-//                             </div>
-//                             <div className='mt-6'>
-//                                 <h3 className='font-medium mb-2'>Gitlab URL</h3>
-//                                 <a className='font-normal flex items-center text-blue-600' href='https://github.com/Kiranism/next-shadcn-dashboard-starter'>
-//                                     <p className='underline mr-1'>
-//                                         https://github.com/Kiranism/next-shadcn-dashboard-starter
-//                                     </p>
-//                                     <ArrowUpRight fontSize="1.5em"/>
-//                                 </a>
-//                             </div>
-//                         </div>
-//                         <div className='w-1/5 pt-2'>
-//                             <div>
-//                                 <h3 className='font-medium'>Created At</h3>
-//                                 <p className='font-normal'>2/10/2022 | 13:45:01</p>
-//                             </div>
-//                             <div className='mt-4'>
-//                                 <h3 className='font-medium'>Updated at</h3>
-//                                 <p className='font-normal mt-1'>4/12/2023 | 11:14:31</p>
-//                             </div>
-//                             <div className='mt-4'>
-//                                 <h3 className='font-medium'>Updated by</h3>
-//                                 <p className='font-normal mt-1'>Hastho</p>
-//                             </div>
-//                         </div>
-//                     </div>
+const Page = () => {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const id = searchParams.get('id');
+    const [service, setService] = useState<Service | null>(null);
+    const [loading, setLoading] = useState(true);
 
-//                     <div>
-//                         <h1 className='text-2xl font-semibold mt-16'>URLs</h1>
-//                         <p className='font-normal'>URL related to this service</p>
-//                     </div>
-//                     <div className='w-full flex justify-center text-sm'>
-//                         <UserTable
-//                             columns={columns}
-//                             data={data}
-//                         />
-//                     </div>
-//                 </div>
-//         </div>
-//     )
-// }
-// export default page;
+    useEffect(() => {
+        if (id) {
+            fetchServiceData(id);
+        }
+    }, [id]);
+
+    const fetchServiceData = async (serviceId: string) => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}/${serviceId}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch service data');
+            }
+            const data = await response.json();
+            setService(data);
+            console.log(data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    if (!service) {
+        return <div>No service data found</div>;
+    }
+
+    const data: URL[] = [
+        { name: 'Pre-Prod URL', url: service.preprodUrl, status: service.preprodUrlStatus },
+        { name: 'Production URL', url: service.prodUrl, status: service.prodUrlStatus },
+    ];
+
+    return (
+        <div>
+            <div className="flex-1 space-y-4 p-4 md:p-8">
+                <Breadcrumbs items={breadcrumbItems} />
+                <div className="flex items-start justify-between">
+                    <Heading
+                        title="Service Detail"
+                        description="Service web detail"
+                    />
+                    <button className="flex justify-center items-center py-2 gap-2 cursor-pointer rounded-md shadow-sm text-white bg-red-600 w-24">
+                        <SquarePen className='h-5 w-5 font-medium' />
+                        Edit
+                    </button>
+                </div>
+                <hr className="border-neutral-200" />
+                <div className='flex justify-center text-sm'>
+                    <div className='w-4/5 pt-2 pr-80'>
+                        <div>
+                            <h3 className='font-medium'>Service Name</h3>
+                            <p className='font-normal'>{service.name}</p>
+                        </div>
+                        <div className='mt-6'>
+                            <h3 className='font-medium'>Description</h3>
+                            <p className='font-normal mt-2'>{service.description}</p>
+                        </div>
+                        <div className='mt-6'>
+                            <h3 className='font-medium mb-2'>Gitlab URL</h3>
+                            <a className='font-normal flex items-center text-blue-600' href={service.gitlabUrl}>
+                                <p className='underline mr-1'>
+                                    {service.gitlabUrl}
+                                </p>
+                                <ArrowUpRight fontSize="1.5em" />
+                            </a>
+                        </div>
+                    </div>
+                    <div className='w-1/5 pt-2'>
+                        <div>
+                            <h3 className='font-medium'>Created At</h3>
+                            <p className='font-normal'>{new Date(service.createdAt).toLocaleString()}</p>
+                        </div>
+                        <div className='mt-4'>
+                            <h3 className='font-medium'>Updated at</h3>
+                            <p className='font-normal mt-1'>{new Date(service.updatedAt).toLocaleString()}</p>
+                        </div>
+                        <div className='mt-4'>
+                            <h3 className='font-medium'>Updated by</h3>
+                            <p className='font-normal mt-1'>{service.user.name}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h1 className='text-2xl font-semibold mt-16'>URLs</h1>
+                    <p className='pt-2 text-sm font-normal text-slate-500'>URL related to this service</p>
+                </div>
+                <div className='w-full h-[112px] flex justify-center text-sm'>
+                    <ServiceDetailTable
+                        columns={columns}
+                        data={data}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default Page;

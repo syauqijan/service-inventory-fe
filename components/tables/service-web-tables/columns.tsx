@@ -4,6 +4,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { MoveDown, MoveUp, Copy } from 'lucide-react';
 import { Service } from '@/app/(dashboard)/dashboard/service/page';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 // function to copy text to clipboard
 const copyToClipboard = (text: string) => {
@@ -84,9 +85,12 @@ export const getColumns = (
     id: 'actions',
     header: '',
     cell: ({ row }) => (
-      <button className='text-gray-500'>
-        View Detail
-      </button>
+      <Link href={`/dashboard/service/service-web/view-service?id=${row.original.id}`} passHref>
+        <button className='text-gray-500'>
+          View Detail
+        </button>
+      </Link>
+      
     ),
   },
 ];

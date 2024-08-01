@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 const breadcrumbItems = [
     { title: 'Main', link: '/dashboard' },
     { title: 'Service', link: '/dashboard/service' },
-    { title: 'Add New Service', link: '/dashboard/service-detail' }
+    { title: 'Add New Service', link: '/dashboard/service/service-web/create-service' }
   ];
  
 interface Status {

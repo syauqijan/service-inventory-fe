@@ -86,7 +86,9 @@ const Page = () => {
                         title="Service Detail"
                         description="Service web detail"
                     />
-                    <button className="flex justify-center items-center py-2 gap-2 cursor-pointer rounded-md shadow-sm text-white bg-red-600 w-24">
+                    <button className="flex justify-center items-center py-2 gap-2 cursor-pointer rounded-md shadow-sm text-white bg-red-600 w-24"
+                            onClick={() => router.push(`/dashboard/service/service-web/update-service?id=${service.id}`)}
+                    >
                         <SquarePen className='h-5 w-5 font-medium' />
                         Edit
                     </button>

@@ -1,25 +1,16 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { UserTable } from '@/components/tables/user-tables/user-tables';
-import { ColumnDef } from '@tanstack/react-table';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Heading } from '@/components/ui/heading';
 import { Plus, Trash } from 'lucide-react';
-import { Plus, Trash } from 'lucide-react';
-import PopupUser from '@/components/popup/popup-user';
-import DeleteUser from '@/components/modal/delete-user';
-import UpdateUser from '@/components/popup/update-user';
-import { CellAction } from '@/components/tables/user-tables/cell-actions';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { SkeletonTable } from '@/components/tables/skeleton-tables';
 import { useDebounce } from '@/hooks/useDebounce'; 
 import {getColumns} from '@/components/tables/service-web-tables/columns';
-import {getColumns} from '@/components/tables/service-web-tables/columns';
 import { useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
-import { WebServiceTable } from '@/components/tables/service-web-tables/service-tables';
 import { WebServiceTable } from '@/components/tables/service-web-tables/service-tables';
 
 const breadcrumbItems = [
@@ -30,13 +21,10 @@ const breadcrumbItems = [
 export interface Service {
     id: string;
     name: string;
-    gitlabURL: string;
+    gitlabUrl: string;
   }
 
 const Page = () => {
-    const [isPopupVisible, setIsPopupVisible] = useState(false);
-    const [isModalDeleteVisible, setIsModalDeleteVisible] = useState(false);
-    const [isModalUpdateVisible, setIsModalUpdateVisible] = useState(false);
     const [data, setData] = useState<Service[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -49,10 +37,9 @@ const Page = () => {
     // const limit = Number(searchParams.get('limit') ?? '10');
     const [page, setPage] = useState<number>(1);
     const [limit, setLimit] = useState<number>(10);
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-    const handleAddNewClick = () => {
-        setIsPopupVisible(true);
-    };
+
     const handleDeleteService = (service:any) => {
         console.log('Delete service:', service);
     };
@@ -61,16 +48,8 @@ const Page = () => {
     console.log('Update service:', service);
     };
 
-    const columns = getColumns(handleDeleteService, handleUpdateService);
+    const columns = getColumns(handleDeleteService, handleUpdateService, selectedIds, setSelectedIds);
     
-    // const webServicesDummyData: Service[] = [
-    //     { id: '1', name: 'service-browse-family-plan', gitlabURL: 'https://github.com/Kiranism/next-shadcn-dashboard-starter...' },
-    //     { id: '2', name: 'service-user-management', gitlabURL: 'https://github.com/Kiranism/user-management-service...' },
-    //     { id: '3', name: 'service-billing', gitlabURL: 'https://github.com/Kiranism/billing-service...' },
-    //     { id: '4', name: 'service-authentication', gitlabURL: 'https://github.com/Kiranism/auth-service...' },
-    //     { id: '5', name: 'service-notifications', gitlabURL: 'https://github.com/Kiranism/notification-service...' },
-    // ];
-
     const fetchData = async () => {
         setLoading(true);
         try {
@@ -94,7 +73,6 @@ const Page = () => {
             const result = await response.json();
             setData(result.services);
             setTotalServices(result.total);
-            console.log('Services:', result.services);
         } catch (error) {
             console.error('Error fetching services:', error);
             setError('An error occurred while fetching services');
@@ -133,6 +111,36 @@ const Page = () => {
             toast.error('An error occurred while deleting service');
         }
     }
+    
+    const deleteSelectedServices = async () => {
+        console.log('Selected IDs:', selectedIds);
+        try {
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ ids: selectedIds }),
+                }
+            );
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Error deleting services:', errorText);
+                toast.error('Failed to delete services');
+                return;
+            }
+
+            toast.success('Services deleted successfully');
+            fetchData();
+            setSelectedIds([]); // Clear selected IDs after deletion
+        } catch (error) {
+            console.error('Error deleting services:', error);
+            toast.error('An error occurred while deleting services');
+        }
+    }
 
     return (
         <>
@@ -143,9 +151,8 @@ const Page = () => {
                 title="Service"
                 description="Create and manage services"
             />
-            
             <Link
-                href={'/dashboard/service/service-web'}
+                href={'/dashboard/service/service-web/create-service'}
                 className="w-[118px] h-10 px-4 py-2 bg-RedTint/900 rounded-md justify-center items-center inline-flex text-white text-sm font-medium"
             >
                 <Plus className="mr-2 h-4 w-4" /> Add New
@@ -182,7 +189,7 @@ const Page = () => {
                     </Tabs>
                 {/* </div> */}
                 <div className='absolute w-auto right-0 flex flex-row justify-center items-center gap-6'>
-                    <button className='cursor-pointer'>
+                    <button className='cursor-pointer' onClick={deleteSelectedServices}>
                         <Trash className="w-6 h-6 text-gray-500 " />
                     </button>
                     <Input
@@ -192,39 +199,8 @@ const Page = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <Input
-                placeholder="Search service"
-                value={searchTerm}
-                className="w-full md:max-w-sm mb-4"
-                onChange={(e) => setSearchTerm(e.target.value)}
-                />
             </div>
-
-            {/* {loading ? (
-            <SkeletonTable />
-            ) : (
-            <UserTable
-                columns={getColumns(handleDeleteUser, handleUpdateUser)}
-                data={data}
-                searchKey="name"
-                pageNo={page}
-                totalUsers={totalUsers}
-                pageCount={Math.ceil(totalUsers / limit)}
-                pageSizeOptions={[10, 20, 30, 40, 50]}
-            />
-            )} */}
         </div>
-        {/* <DeleteUser
-            isVisible={isModalDeleteVisible}
-            onClose={handleCloseDeleteModal}
-            onConfirm={handleConfirmDelete}
-        />
-        <UpdateUser
-            isVisible={isModalUpdateVisible}
-            onClose={handleCloseUpdateModal}
-            user={selectedUser}
-            onUpdate={fetchData}
-        /> */}
     </>
         
     

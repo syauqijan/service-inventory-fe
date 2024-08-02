@@ -101,7 +101,7 @@ const PopupUser: React.FC<PopupUserProps> = ({ isVisible, onClose, onCreate }) =
         setErrors({});
     }
     const createSubmit = async () => {
-        const formIsValid = validateForm();
+        const formIsValid = await validateForm();
         if (formIsValid) {
             setIsLoading(true);
             try {

@@ -121,7 +121,7 @@ const PopupUpdateUser: React.FC<PopupUpdateUserProps> = ({ isVisible, onClose, u
         setErrors({});
     }
     const handleUpdate = async () => {
-        const formIsValid = validateForm();
+        const formIsValid = await validateForm();
         if (formIsValid && user) {
             setIsLoading(true);
     

@@ -71,7 +71,8 @@ const Page = () => {
     }
     const createSubmit = async (event:any) => {
         event.preventDefault();
-        if (!validateForm()) {
+        const formIsValid = await validateForm();
+        if (!formIsValid) {
             return;
         }
         setIsLoading(true);

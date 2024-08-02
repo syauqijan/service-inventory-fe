@@ -100,8 +100,8 @@ const Page = () => {
     const updateSubmit = async (event: any) => {
         event.preventDefault();
         const formIsValid = await validateForm();
-        setIsLoading(true);
         if(formIsValid){
+            setIsLoading(true);
             try {
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}/${serviceId}`, {
                     method: 'PATCH',

@@ -133,27 +133,27 @@ const Page = () => {
                     <form onSubmit={createSubmit}>
                         <div className='w-2/5'>
                             <h3 className='font-medium mb-1'>Service Name</h3>
-                            <input type="text" id="Updateemail" name="Updateemail" value={name} onChange={(e) => setName(e.target.value)}
-                                placeholder="Enter Service Name" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" />
+                            <input type="text" id="serviceName" name="serviceName" value={name} onChange={(e) => setName(e.target.value)}
+                                placeholder="Enter Service Name" className="placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" />
                             {errors.name && <p className="text-red-500">{errors.name}</p>}
                         </div>
                         <div className=' mt-3'>
                             <h3 className='font-medium mb-1'>Description</h3>
-                            <textarea id="Updateemail" name="Updateemail" value={description} onChange={(e) => setDescription(e.target.value)}
+                            <textarea id="serviceDesc" name="serviceDesc" value={description} onChange={(e) => setDescription(e.target.value)}
                                 placeholder="Enter description" className="min-h-20 max-h-20 emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-1/2" ></textarea>
                             {errors.description && <p className="text-red-500">{errors.description}</p>}
                         </div>
                         <div className='w-2/5 mt-1'>
                             <h3 className='font-medium mb-1'>Gitlab url</h3>
-                            <input type="text" id="Updateemail" name="Updateemail" value={gitlabUrl} onChange={(e) => setGitlabUrl(e.target.value)}
-                                placeholder="Enter link" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5"  />
+                            <input type="text" id="gitlabUrl" name="gitlabUrl" value={gitlabUrl} onChange={(e) => setGitlabUrl(e.target.value)}
+                                placeholder="Enter link" className="placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5"  />
                             {errors.gitlabUrl && <p className="text-red-500">{errors.gitlabUrl}</p>}
                         </div>
                         <div className='mt-3 flex justify-center w-1/2'>
                             <div className='w-4/5'>
                                 <h3 className='font-medium mb-1'>Pre-Prod URL</h3>
-                                <input type="text" id="Updateemail" name="Updateemail" value={preprodUrl} onChange={(e) => setPreprodUrl(e.target.value)}
-                                    placeholder="Enter link" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5"  />
+                                <input type="text" id="preprodUrl" name="preprodUrl" value={preprodUrl} onChange={(e) => setPreprodUrl(e.target.value)}
+                                    placeholder="Enter link" className="placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5"  />
                                 {errors.preprodUrl && <p className="text-red-500">{errors.preprodUrl}</p>}
                             </div>
                             <div className='w-1/5'>
@@ -179,7 +179,7 @@ const Page = () => {
                         <div className='mt-3 flex justify-center w-1/2'>
                             <div className='w-4/5'>
                                 <h3 className='font-medium mb-1'>Production URL</h3>
-                                <input type="text" id="Updateemail" name="Updateemail" placeholder="Enter link" value={prodUrl} onChange={(e) => setProdUrl(e.target.value)}
+                                <input type="text" id="prodUrl" name="prodUrl" placeholder="Enter link" value={prodUrl} onChange={(e) => setProdUrl(e.target.value)}
                                     className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5"  />
                                 {errors.prodUrl && <p className="text-red-500">{errors.prodUrl}</p>}
                             </div>

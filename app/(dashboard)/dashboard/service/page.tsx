@@ -22,12 +22,11 @@ export interface Service {
     id: string;
     name: string;
     gitlabUrl: string;
-  }
+}
 
 const Page = () => {
     const [data, setData] = useState<Service[]>([]);
     const [error, setError] = useState<string | null>(null);
-    const [selectedService, setSelectedService] = useState<Service | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [totalServices, setTotalServices] = useState<number>(0);
@@ -84,33 +83,6 @@ const Page = () => {
     useEffect(() => {
         fetchData();
     }, [debouncedSearchTerm, page, limit]);
-
-    const deleteService = async (service: Service) => {
-        try {
-            const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}/${service.id}`,
-            {
-                method: 'DELETE',
-                headers: {
-                'Content-Type': 'application/json',
-                },
-            }
-            );
-
-            if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error deleting service:', errorText);
-            toast.error('Failed to delete service');
-            return;
-            }
-
-            toast.success('Service deleted successfully');
-            fetchData();
-        } catch (error) {
-            console.error('Error deleting service:', error);
-            toast.error('An error occurred while deleting service');
-        }
-    }
     
     const deleteSelectedServices = async () => {
         console.log('Selected IDs:', selectedIds);
@@ -135,7 +107,7 @@ const Page = () => {
 
             toast.success('Services deleted successfully');
             fetchData();
-            setSelectedIds([]); // Clear selected IDs after deletion
+            setSelectedIds([]); 
         } catch (error) {
             console.error('Error deleting services:', error);
             toast.error('An error occurred while deleting services');
@@ -161,7 +133,6 @@ const Page = () => {
             <hr className="border-neutral-200" />
 
             <div className='relative flex flex-row'>
-                {/* <div className='flex justify-center items-center'> */}
                     <Tabs defaultValue="web" className="space-y-4 w-full">
                         <TabsList>
                             <TabsTrigger value="web">Web</TabsTrigger>
@@ -187,7 +158,6 @@ const Page = () => {
                         </TabsContent>
 
                     </Tabs>
-                {/* </div> */}
                 <div className='absolute w-auto right-0 flex flex-row justify-center items-center gap-6'>
                     <button className='cursor-pointer' onClick={deleteSelectedServices}>
                         <Trash className="w-6 h-6 text-gray-500 " />

@@ -11,11 +11,11 @@ const breadcrumbItems = [
     { title: 'Main', link: '/dashboard' },
     { title: 'Service', link: '/dashboard/service' },
     { title: 'Add New Service', link: '/dashboard/service/service-web/create-service' }
-  ];
- 
+];
+
 interface Status {
     statusName: string;
-  }  
+}  
 
 interface ValidationErrors {
     name?: string;
@@ -24,9 +24,6 @@ interface ValidationErrors {
     preprodUrl?: string;
     prodUrl?: string;
 }
-
-  var i1 = 0;
-  var i2 = 0;
 
 const Page = () => {
     const { user } = useAuth();
@@ -47,24 +44,24 @@ const Page = () => {
         let err: ValidationErrors = {};
         let isValid = true;
         if (!name) {
-          err.name = 'Service name must be filled';
-          isValid = false;
+            err.name = 'Service name must be filled';
+            isValid = false;
         }
         if (!gitlabUrl) {
-          err.gitlabUrl = 'URL must be filled';
-          isValid = false;
+            err.gitlabUrl = 'URL must be filled';
+            isValid = false;
         }
         if (!description) {
-          err.description = 'Description must be filled';
-          isValid = false;
+            err.description = 'Description must be filled';
+            isValid = false;
         }
         if (!preprodUrl) {
-          err.preprodUrl = 'URL must be filled';
-          isValid = false;
+            err.preprodUrl = 'URL must be filled';
+            isValid = false;
         }
         if (!prodUrl) {
-          err.prodUrl = 'URL must be filledd';
-          isValid = false;
+            err.prodUrl = 'URL must be filledd';
+            isValid = false;
         }
         setErrors(err);
         return isValid;
@@ -137,26 +134,26 @@ const Page = () => {
                         <div className='w-2/5'>
                             <h3 className='font-medium mb-1'>Service Name</h3>
                             <input type="text" id="Updateemail" name="Updateemail" value={name} onChange={(e) => setName(e.target.value)}
-                                placeholder="Enter Service Name" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" required />
+                                placeholder="Enter Service Name" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" />
                             {errors.name && <p className="text-red-500">{errors.name}</p>}
                         </div>
                         <div className=' mt-3'>
                             <h3 className='font-medium mb-1'>Description</h3>
                             <textarea id="Updateemail" name="Updateemail" value={description} onChange={(e) => setDescription(e.target.value)}
-                                placeholder="Enter description" className="min-h-20 max-h-20 emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-1/2" required></textarea>
+                                placeholder="Enter description" className="min-h-20 max-h-20 emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-1/2" ></textarea>
                             {errors.description && <p className="text-red-500">{errors.description}</p>}
                         </div>
                         <div className='w-2/5 mt-1'>
                             <h3 className='font-medium mb-1'>Gitlab url</h3>
                             <input type="text" id="Updateemail" name="Updateemail" value={gitlabUrl} onChange={(e) => setGitlabUrl(e.target.value)}
-                                placeholder="Enter link" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" required />
+                                placeholder="Enter link" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5"  />
                             {errors.gitlabUrl && <p className="text-red-500">{errors.gitlabUrl}</p>}
                         </div>
                         <div className='mt-3 flex justify-center w-1/2'>
                             <div className='w-4/5'>
                                 <h3 className='font-medium mb-1'>Pre-Prod URL</h3>
                                 <input type="text" id="Updateemail" name="Updateemail" value={preprodUrl} onChange={(e) => setPreprodUrl(e.target.value)}
-                                    placeholder="Enter link" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" required />
+                                    placeholder="Enter link" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5"  />
                                 {errors.preprodUrl && <p className="text-red-500">{errors.preprodUrl}</p>}
                             </div>
                             <div className='w-1/5'>
@@ -183,7 +180,7 @@ const Page = () => {
                             <div className='w-4/5'>
                                 <h3 className='font-medium mb-1'>Production URL</h3>
                                 <input type="text" id="Updateemail" name="Updateemail" placeholder="Enter link" value={prodUrl} onChange={(e) => setProdUrl(e.target.value)}
-                                    className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" required />
+                                    className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5"  />
                                 {errors.prodUrl && <p className="text-red-500">{errors.prodUrl}</p>}
                             </div>
                             <div className='w-1/5'>
@@ -208,7 +205,7 @@ const Page = () => {
                         </div>
                         <div className='mt-8 flex justify-between pr-16'>
                             <p className='active:scale-95 min-w-16 form-flex justify-center items-center py-3 px-4 gap-2 cursor-pointer rounded-md shadow-sm text-red-600 bg-white border border-red-600 w-20 mt-3 mb-1 ml-3 font-semibold text-center' onClick={() => router.back()}>Cancel</p>
-                            <input type="submit" value="Save" className="active:scale-95 min-w-16 form-flex justify-center items-center border py-3 px-4 gap-2 cursor-pointer rounded-md shadow-sm text-white bg-red-600 w-20 mt-3 mb-1 ml-3 font-semibold"
+                            <input type="submit" value="Save" disabled={isLoading} className="active:scale-95 min-w-16 form-flex justify-center items-center border py-3 px-4 gap-2 cursor-pointer rounded-md shadow-sm text-white bg-red-600 w-20 mt-3 mb-1 ml-3 font-semibold"
                             />
                         </div>
                     </form>

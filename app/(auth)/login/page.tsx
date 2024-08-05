@@ -18,19 +18,24 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT_LOGIN||'', {
+      try{
+        const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT_LOGIN||'', {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',
           },
           body: JSON.stringify({ email, password }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-          login(data.token, data.expiresIn);
-          router.push('/dashboard');
-      } else {
-          console.error(data.msg);
+        });
+        const data = await response.json();
+        if (response.ok) {
+            login(data.token, data.expiresIn);
+            router.push('/dashboard');
+        } else {
+            console.error(data.msg);
+        }
+      }
+      catch (error) {
+        console.error('Error:', error);
       }
   };
 

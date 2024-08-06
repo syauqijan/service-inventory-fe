@@ -5,6 +5,7 @@ import { Heading } from '@/components/ui/heading';
 import { useRouter, useSearchParams } from 'next/navigation';
 import useAuth from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import axios from 'axios';
 
 const breadcrumbItems = [
     { title: 'Main', link: '/dashboard' },
@@ -58,12 +59,8 @@ const Page = () => {
 
     const fetchServiceData = async (id: string) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}/${id}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch service data');
-            }
-            const data = await response.json();
-            setPrevData(data);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}/${id}`);
+            setPrevData(response.data);
         } catch (error) {
             console.error('Failed to fetch service data', error);
             toast.error('An error occurred while fetching service data');
@@ -99,36 +96,36 @@ const Page = () => {
 
     const updateSubmit = async (event: any) => {
         event.preventDefault();
-        const formIsValid = await validateForm();
-        if(formIsValid){
+        const formIsValid = validateForm();
+        if (formIsValid) {
             setIsLoading(true);
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}/${serviceId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        name, gitlabUrl, description, preprodUrl, preprodUrlStatus,
-                        prodUrl, prodUrlStatus, userId
-                    }),
+                const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}/${serviceId}`, {
+                    name,
+                    gitlabUrl,
+                    description,
+                    preprodUrl,
+                    preprodUrlStatus,
+                    prodUrl,
+                    prodUrlStatus,
+                    userId
                 });
-    
-                if (response.ok) {
+
+                if (response.status === 200) {
                     router.push('/dashboard/service');
                     toast.success('Service updated successfully');
-                } else {
-                    const errorData = await response.json();
-                    setErrors(errorData.errors);
                 }
             } catch (error) {
                 console.error('Failed to update service', error);
-                toast.error('An error occurred while updating service');
+                if (axios.isAxiosError(error) && error.response) {
+                    setErrors(error.response.data.errors || {});
+                } else {
+                    toast.error('An error occurred while updating service');
+                }
             } finally {
                 setIsLoading(false);
             }
         }
-        
     };
 
     const handleCheckboxPreProd = () => {

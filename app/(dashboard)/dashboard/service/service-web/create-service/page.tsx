@@ -5,7 +5,7 @@ import { Heading } from '@/components/ui/heading';
 import { useRouter } from 'next/navigation';
 import useAuth from '@/hooks/useAuth';
 import { toast } from 'sonner';
-
+import axios from 'axios';
 
 const breadcrumbItems = [
     { title: 'Main', link: '/dashboard' },
@@ -74,23 +74,19 @@ const Page = () => {
         }
         setIsLoading(true);
         try {
-            const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES || '', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name, gitlabUrl, description, preprodUrl, preprodUrlStatus,
-                    prodUrl, prodUrlStatus, userId
-                }),
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}`, {
+                userId,
+                name,
+                description,
+                gitlabUrl,
+                preprodUrl,
+                preprodUrlStatus,
+                prodUrl,
+                prodUrlStatus
             });
-    
-            if (response.ok) {
+            if(response.status===201){
                 router.push('/dashboard/service');
-                toast.success('Service created successfully');
-            } else {
-                const errorData = await response.json();
-                setErrors(errorData.errors);
+                toast.success('Service created successfully')
             }
         } catch (error) {
             console.error('Failed to create service', error);

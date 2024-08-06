@@ -12,6 +12,7 @@ import { useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 import { WebServiceTable } from '@/components/tables/service-web-tables/service-tables';
+import axios from 'axios';
 
 const breadcrumbItems = [
     { title: 'Main', link: '/dashboard' },
@@ -52,26 +53,19 @@ const Page = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}?search=${debouncedSearchTerm}&page=${page}&limit=${limit}`,
-            {
-                method: 'GET',
-                headers: {
-                'Content-Type': 'application/json',
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}`, {
+                params: {
+                    search: debouncedSearchTerm,
+                    page,
+                    limit
                 },
-            }
-            );
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
 
-            if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error fetching services:', errorText);
-            setError('Failed to fetch services');
-            return;
-            }
-
-            const result = await response.json();
-            setData(result.services);
-            setTotalServices(result.total);
+            setData(response.data.services)
+            setTotalServices(response.data.total)
         } catch (error) {
             console.error('Error fetching services:', error);
             setError('An error occurred while fetching services');
@@ -87,27 +81,21 @@ const Page = () => {
     const deleteSelectedServices = async () => {
         console.log('Selected IDs:', selectedIds);
         try {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}`,
-                {
-                    method: 'DELETE',
+            const response = await axios.delete(
+                `${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}`, {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ ids: selectedIds }),
-                }
-            );
+                    data: {
+                        ids: selectedIds
+                    }
+                });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Error deleting services:', errorText);
-                toast.error('Failed to delete services');
-                return;
+            if(response.status===200){
+                toast.success('Services deleted successfully');
+                fetchData();
+                setSelectedIds([]);
             }
-
-            toast.success('Services deleted successfully');
-            fetchData();
-            setSelectedIds([]); 
         } catch (error) {
             console.error('Error deleting services:', error);
             toast.error('An error occurred while deleting services');

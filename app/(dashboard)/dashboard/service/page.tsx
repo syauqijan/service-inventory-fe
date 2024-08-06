@@ -12,6 +12,7 @@ import { useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 import { WebServiceTable } from '@/components/tables/service-web-tables/service-tables';
+import axios from 'axios';
 
 const breadcrumbItems = [
     { title: 'Main', link: '/dashboard' },
@@ -22,12 +23,11 @@ export interface Service {
     id: string;
     name: string;
     gitlabUrl: string;
-  }
+}
 
 const Page = () => {
     const [data, setData] = useState<Service[]>([]);
     const [error, setError] = useState<string | null>(null);
-    const [selectedService, setSelectedService] = useState<Service | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [totalServices, setTotalServices] = useState<number>(0);
@@ -53,26 +53,19 @@ const Page = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}?search=${debouncedSearchTerm}&page=${page}&limit=${limit}`,
-            {
-                method: 'GET',
-                headers: {
-                'Content-Type': 'application/json',
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}`, {
+                params: {
+                    search: debouncedSearchTerm,
+                    page,
+                    limit
                 },
-            }
-            );
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
 
-            if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error fetching services:', errorText);
-            setError('Failed to fetch services');
-            return;
-            }
-
-            const result = await response.json();
-            setData(result.services);
-            setTotalServices(result.total);
+            setData(response.data.services)
+            setTotalServices(response.data.total)
         } catch (error) {
             console.error('Error fetching services:', error);
             setError('An error occurred while fetching services');
@@ -84,58 +77,25 @@ const Page = () => {
     useEffect(() => {
         fetchData();
     }, [debouncedSearchTerm, page, limit]);
-
-    const deleteService = async (service: Service) => {
-        try {
-            const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}/${service.id}`,
-            {
-                method: 'DELETE',
-                headers: {
-                'Content-Type': 'application/json',
-                },
-            }
-            );
-
-            if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error deleting service:', errorText);
-            toast.error('Failed to delete service');
-            return;
-            }
-
-            toast.success('Service deleted successfully');
-            fetchData();
-        } catch (error) {
-            console.error('Error deleting service:', error);
-            toast.error('An error occurred while deleting service');
-        }
-    }
     
     const deleteSelectedServices = async () => {
         console.log('Selected IDs:', selectedIds);
         try {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}`,
-                {
-                    method: 'DELETE',
+            const response = await axios.delete(
+                `${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}`, {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ ids: selectedIds }),
-                }
-            );
+                    data: {
+                        ids: selectedIds
+                    }
+                });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Error deleting services:', errorText);
-                toast.error('Failed to delete services');
-                return;
+            if(response.status===200){
+                toast.success('Services deleted successfully');
+                fetchData();
+                setSelectedIds([]);
             }
-
-            toast.success('Services deleted successfully');
-            fetchData();
-            setSelectedIds([]); // Clear selected IDs after deletion
         } catch (error) {
             console.error('Error deleting services:', error);
             toast.error('An error occurred while deleting services');
@@ -161,7 +121,6 @@ const Page = () => {
             <hr className="border-neutral-200" />
 
             <div className='relative flex flex-row'>
-                {/* <div className='flex justify-center items-center'> */}
                     <Tabs defaultValue="web" className="space-y-4 w-full">
                         <TabsList>
                             <TabsTrigger value="web">Web</TabsTrigger>
@@ -187,7 +146,6 @@ const Page = () => {
                         </TabsContent>
 
                     </Tabs>
-                {/* </div> */}
                 <div className='absolute w-auto right-0 flex flex-row justify-center items-center gap-6'>
                     <button className='cursor-pointer' onClick={deleteSelectedServices}>
                         <Trash className="w-6 h-6 text-gray-500 " />

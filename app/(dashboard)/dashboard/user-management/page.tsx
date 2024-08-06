@@ -1,14 +1,12 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { UserTable } from '@/components/tables/user-tables/user-tables';
-import { ColumnDef } from '@tanstack/react-table';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Heading } from '@/components/ui/heading';
 import { Plus } from 'lucide-react';
 import PopupUser from '@/components/popup/popup-user';
 import DeleteUser from '@/components/modal/delete-user';
 import UpdateUser from '@/components/popup/update-user';
-import { CellAction } from '@/components/tables/user-tables/cell-actions';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { SkeletonTable } from '@/components/tables/skeleton-tables';

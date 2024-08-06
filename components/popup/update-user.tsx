@@ -48,7 +48,7 @@ const PopupUpdateUser: React.FC<PopupUpdateUserProps> = ({ isVisible, onClose, u
             setEmail(user.email);
             setRoleId(user.roleId);
         }
-      }, [user]);
+    }, [user]);
 
     const fetchRoles = async () => {
         try {
@@ -121,7 +121,7 @@ const PopupUpdateUser: React.FC<PopupUpdateUserProps> = ({ isVisible, onClose, u
         setErrors({});
     }
     const handleUpdate = async () => {
-        const formIsValid = validateForm();
+        const formIsValid = await validateForm();
         if (formIsValid && user) {
             setIsLoading(true);
     
@@ -141,7 +141,6 @@ const PopupUpdateUser: React.FC<PopupUpdateUserProps> = ({ isVisible, onClose, u
                     },
                     body: JSON.stringify(updateData),
                 });
-    
                 if (response.ok) {
                     console.log('User updated');
                     emptyForm();
@@ -271,14 +270,14 @@ return (
                     type="button"
                     className="absolute right-3 top-3"
                     onClick={() => setShowPassword(!showPassword)}
-                  >
+                >
                     {showPassword ? <EyeOff className='text-neutral-300 w-5'/> : <Eye className='text-neutral-300 w-5'/>}
-                  </button>
-                {errors.password && (
-                    <p className="text-xs text-red-500 mt-1">
-                    {errors.password}
-                    </p>
-                )}
+                </button>
+                    {errors.password && (
+                        <p className="text-xs text-red-500 mt-1">
+                        {errors.password}
+                        </p>
+                    )}
                 </div>
             </div>
             <div className="flex justify-end mt-3">

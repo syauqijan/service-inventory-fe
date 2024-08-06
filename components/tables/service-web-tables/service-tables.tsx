@@ -39,7 +39,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   searchKey: string;
   pageNo: number;
-  totalUsers: number;
+  totalItems: number;
   pageSizeOptions?: number[];
   pageCount: number;
   searchParams?: {

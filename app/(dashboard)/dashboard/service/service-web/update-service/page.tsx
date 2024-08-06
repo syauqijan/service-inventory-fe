@@ -5,6 +5,7 @@ import { Heading } from '@/components/ui/heading';
 import { useRouter, useSearchParams } from 'next/navigation';
 import useAuth from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import axios from 'axios';
 
 const breadcrumbItems = [
     { title: 'Main', link: '/dashboard' },
@@ -58,12 +59,8 @@ const Page = () => {
 
     const fetchServiceData = async (id: string) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}/${id}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch service data');
-            }
-            const data = await response.json();
-            setPrevData(data);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}/${id}`);
+            setPrevData(response.data);
         } catch (error) {
             console.error('Failed to fetch service data', error);
             toast.error('An error occurred while fetching service data');
@@ -99,36 +96,36 @@ const Page = () => {
 
     const updateSubmit = async (event: any) => {
         event.preventDefault();
-        const formIsValid = await validateForm();
-        setIsLoading(true);
-        if(formIsValid){
+        const formIsValid = validateForm();
+        if (formIsValid) {
+            setIsLoading(true);
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}/${serviceId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        name, gitlabUrl, description, preprodUrl, preprodUrlStatus,
-                        prodUrl, prodUrlStatus, userId
-                    }),
+                const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}/${serviceId}`, {
+                    name,
+                    gitlabUrl,
+                    description,
+                    preprodUrl,
+                    preprodUrlStatus,
+                    prodUrl,
+                    prodUrlStatus,
+                    userId
                 });
-    
-                if (response.ok) {
+
+                if (response.status === 200) {
                     router.push('/dashboard/service');
                     toast.success('Service updated successfully');
-                } else {
-                    const errorData = await response.json();
-                    setErrors(errorData.errors);
                 }
             } catch (error) {
                 console.error('Failed to update service', error);
-                toast.error('An error occurred while updating service');
+                if (axios.isAxiosError(error) && error.response) {
+                    setErrors(error.response.data.errors || {});
+                } else {
+                    toast.error('An error occurred while updating service');
+                }
             } finally {
                 setIsLoading(false);
             }
         }
-        
     };
 
     const handleCheckboxPreProd = () => {
@@ -162,26 +159,26 @@ const Page = () => {
                     <form onSubmit={updateSubmit}>
                         <div className='w-2/5'>
                             <h3 className='font-medium mb-1'>Service Name</h3>
-                            <input type="text" id="Updateemail" name="Updateemail" value={name} onChange={(e) => setName(e.target.value)}
+                            <input type="text" id="serviceName" name="serviceName" value={name} onChange={(e) => setName(e.target.value)}
                                 placeholder="Enter Service Name" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" required />
                             {errors.name && <p className="text-red-500">{errors.name}</p>}
                         </div>
                         <div className=' mt-3'>
                             <h3 className='font-medium mb-1'>Description</h3>
-                            <textarea id="Updateemail" name="Updateemail" value={description} onChange={(e) => setDescription(e.target.value)}
+                            <textarea id="seviceDesc" name="seviceDesc" value={description} onChange={(e) => setDescription(e.target.value)}
                                 placeholder="Enter description" className="min-h-20 max-h-20 emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-1/2" required></textarea>
                             {errors.description && <p className="text-red-500">{errors.description}</p>}
                         </div>
                         <div className='w-2/5 mt-1'>
                             <h3 className='font-medium mb-1'>Gitlab url</h3>
-                            <input type="text" id="Updateemail" name="Updateemail" value={gitlabUrl} onChange={(e) => setGitlabUrl(e.target.value)}
+                            <input type="text" id="gitlabUrl" name="gitlabUrl" value={gitlabUrl} onChange={(e) => setGitlabUrl(e.target.value)}
                                 placeholder="Enter link" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" required />
                             {errors.gitlabUrl && <p className="text-red-500">{errors.gitlabUrl}</p>}
                         </div>
                         <div className='mt-3 flex justify-center w-1/2'>
                             <div className='w-4/5'>
                                 <h3 className='font-medium mb-1'>Pre-Prod URL</h3>
-                                <input type="text" id="Updateemail" name="Updateemail" value={preprodUrl} onChange={(e) => setPreprodUrl(e.target.value)}
+                                <input type="text" id="preprodUrl" name="preprodUrl" value={preprodUrl} onChange={(e) => setPreprodUrl(e.target.value)}
                                     placeholder="Enter link" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" required />
                                 {errors.preprodUrl && <p className="text-red-500">{errors.preprodUrl}</p>}
                             </div>
@@ -208,7 +205,7 @@ const Page = () => {
                         <div className='mt-3 flex justify-center w-1/2'>
                             <div className='w-4/5'>
                                 <h3 className='font-medium mb-1'>Production URL</h3>
-                                <input type="text" id="Updateemail" name="Updateemail" placeholder="Enter link" value={prodUrl} onChange={(e) => setProdUrl(e.target.value)}
+                                <input type="text" id="prodUrl" name="prodUrl" placeholder="Enter link" value={prodUrl} onChange={(e) => setProdUrl(e.target.value)}
                                     className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" required />
                                 {errors.prodUrl && <p className="text-red-500">{errors.prodUrl}</p>}
                             </div>
@@ -234,7 +231,7 @@ const Page = () => {
                         </div>
                         <div className='mt-8 flex justify-between pr-16'>
                             <p className='active:scale-95 min-w-16 form-flex justify-center items-center py-3 px-4 gap-2 cursor-pointer rounded-md shadow-sm text-red-600 bg-white border border-red-600 w-20 mt-3 mb-1 ml-3 font-semibold text-center' onClick={() => router.back()}>Cancel</p>
-                            <input type="submit" value="Save" className="active:scale-95 min-w-16 form-flex justify-center items-center border py-3 px-4 gap-2 cursor-pointer rounded-md shadow-sm text-white bg-red-600 w-20 mt-3 mb-1 ml-3 font-semibold"
+                            <input type="submit" value="Save" disabled={isLoading} className="active:scale-95 min-w-16 form-flex justify-center items-center border py-3 px-4 gap-2 cursor-pointer rounded-md shadow-sm text-white bg-red-600 w-20 mt-3 mb-1 ml-3 font-semibold"
                             />
                         </div>
                     </form>

@@ -9,6 +9,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import {columns} from '@/components/tables/service-web-detail-tables/columns';
 import { toast } from 'sonner';
 import { URL } from '@/components/tables/service-web-detail-tables/columns';
+import axios from 'axios';
 
 interface Service {
     id: string;
@@ -49,13 +50,8 @@ const Page = () => {
 
     const fetchServiceData = async (serviceId: string) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}/${serviceId}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch service data');
-            }
-            const data = await response.json();
-            setService(data);
-            console.log(data);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}/${serviceId}`);
+            setService(response.data);
         } catch (error) {
             console.error(error);
         } finally {

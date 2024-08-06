@@ -4,15 +4,16 @@ import { UserTable } from '@/components/tables/user-tables/user-tables';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Heading } from '@/components/ui/heading';
 import { Plus } from 'lucide-react';
-import PopupUser from '@/components/popup/popup-user';
+import CreateUser from '@/components/popup/user-management/create-user';
 import DeleteUser from '@/components/modal/delete-user';
-import UpdateUser from '@/components/popup/update-user';
+import UpdateUser from '@/components/popup/user-management/update-user';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { SkeletonTable } from '@/components/tables/skeleton-tables';
 import { useDebounce } from '@/hooks/useDebounce'; 
 import {getColumns} from '@/components/tables/user-tables/columns';
 import { useSearchParams } from 'next/navigation';
+import axios from 'axios';
 
 export interface User {
   id: number;
@@ -51,26 +52,25 @@ const Page = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_ENDPOINT_USERS}?search=${debouncedSearchTerm}&page=${page}&limit=${limit}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_ENDPOINT_USERS}`, {
+        params: {
+            search: debouncedSearchTerm,
+            page,
+            limit
+        },
+        headers: {
+            'Content-Type': 'application/json'
         }
-      );
+    });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error fetching users:', errorText);
+      if (response.status !== 200) {
         setError('Failed to fetch users');
         return;
       }
 
-      const result = await response.json();
-      setData(result.users);
-      setTotalUsers(result.total);
+
+      setData(response.data.users);
+      setTotalUsers(response.data.total);
     } catch (error) {
       console.error('Error fetching users:', error);
       setError('An error occurred while fetching users');
@@ -118,7 +118,7 @@ const Page = () => {
   const handleConfirmDelete = async () => {
     if (selectedUser) {
       try {
-        const response = await fetch(
+        const response = await axios.delete(
           `${process.env.NEXT_PUBLIC_API_ENDPOINT_USERS}/${selectedUser.id}`,
           {
             method: 'DELETE',
@@ -128,16 +128,14 @@ const Page = () => {
           }
         );
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Error deleting user:', errorText);
+        if (response.status === 200) {
+          setData(data.filter((user) => user.id !== selectedUser.id));
+          handleCloseDeleteModal();
+          toast.success('User deleted successfully');
+        }else{
           setError('Failed to delete user');
-          return;
+          toast.error('User deletion error');
         }
-
-        setData(data.filter((user) => user.id !== selectedUser.id));
-        handleCloseDeleteModal();
-        toast.success('User deleted successfully');
       } catch (error) {
         console.error('Error deleting user:', error);
         setError('An error occurred while deleting user');
@@ -187,7 +185,7 @@ const Page = () => {
           />
         )}
       </div>
-      <PopupUser
+      <CreateUser
         isVisible={isPopupVisible}
         onClose={handleClosePopup}
         onCreate={fetchData}

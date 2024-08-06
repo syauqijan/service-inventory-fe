@@ -1,12 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import {toast} from "sonner";
 import dotenv from 'dotenv';
+import { Eye, EyeOff } from 'lucide-react';
+import axios from "axios";
 dotenv.config();
 
-interface PopupUserProps {
+
+interface User {
+    id: number;
+    name: string;
+    email: string;
+    password: string;
+    roleId: number;
+}
+
+interface PopupUpdateUserProps {
     isVisible: boolean;
     onClose: () => void;
-    onCreate: () => void; 
+    user: User | null;
+    onUpdate: () => void;
 }
 
 interface ValidationErrors {
@@ -20,33 +32,39 @@ interface Role {
     name: string;
   }
 
-const PopupUser: React.FC<PopupUserProps> = ({ isVisible, onClose, onCreate }) => {
+const PopupUpdateUser: React.FC<PopupUpdateUserProps> = ({ isVisible, onClose, user, onUpdate}) => {
     const [email, setEmail] = useState<string>('');
     const [name, setName] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [roleId, setRoleId] = useState<number>(1);
     const [roles, setRoles] = useState<Role[]>([]);
     const [errors, setErrors] = useState<ValidationErrors>({});
+    const [showPassword, setShowPassword] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
 
+    useEffect(() => {
+        if (user) {
+            setName(user.name);
+            setEmail(user.email);
+            setRoleId(user.roleId);
+        }
+    }, [user]);
+
     const fetchRoles = async () => {
         try {
-        const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT_ROLES || '', {
-            method: 'GET',
-            headers: {
-            'Content-Type': 'application/json',
-            },
-        });
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_ENDPOINT_ROLES}`, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error fetching roles:', errorText);
+        if (response.status !== 200) {
+            console.error('Failed to fetch roles');
             return;
         }
 
-        const result = await response.json();
-        setRoles(result);
+        setRoles(response.data);
         } catch (error) {
         console.error('Error fetching roles:', error);
         }
@@ -85,7 +103,7 @@ const PopupUser: React.FC<PopupUserProps> = ({ isVisible, onClose, onCreate }) =
         isValid = false;
         }
 
-        if (!validatePassword(password)) {
+        if(password !== '' && !validatePassword(password)) {
         err.password = 'Password is invalid';
         isValid = false;
         }
@@ -100,30 +118,39 @@ const PopupUser: React.FC<PopupUserProps> = ({ isVisible, onClose, onCreate }) =
         setPassword('');
         setErrors({});
     }
-    const createSubmit = async () => {
+    const handleUpdate = async () => {
         const formIsValid = await validateForm();
-        if (formIsValid) {
+        if (formIsValid && user) {
             setIsLoading(true);
+    
             try {
-                const response = await fetch(process.env.NEXT_PUBLIC_API_ENDPOINT_USERS||'', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name, email, password, roleId }),
+                const updateData: { name: string; email: string; roleId: number; password?: string } = {
+                    name,
+                    email,
+                    roleId
+                };
+                if (password !== '') {
+                    updateData.password = password;
+                }
+                const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_ENDPOINT_USERS}/${user.id}`, {
+                    ...updateData
+                }, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 });
-                if (response.ok) {
-                console.log('User created');
-                emptyForm();
-                onClose();
-                onCreate();
-                toast.success('New user created successfully');
+                if (response.status === 200) {
+                    console.log('User updated');
+                    emptyForm();
+                    onClose();
+                    onUpdate();
+                    toast.success('User updated successfully');
                 } else {
-                    toast.error('New user created error');
-                    console.error('Failed to create user');
+                    toast.error('User update error');
+                    console.error('Failed to update user');
                 }
             } catch (error) {
-                toast.error('New user created error');
+                toast.error('User update error');
                 console.error('Error:', error);
             } finally {
                 setIsLoading(false);
@@ -146,14 +173,14 @@ return (
     >
         <div className="mr-2">
         <div className="font-semibold text-left mt-7 text-xl flex justify-between">
-            Create New User
+            Update User Account
             <button className="mb-2 mr-2" onClick={onClose}>
             X
             </button>
         </div>
         <div className="mb-3">
             <p className="text-slate-400 mt-2 text-base">
-            Register new account with specified role to access.
+            Update account info with specified role to access.
             </p>
         </div>
         <form className="flex flex-col">
@@ -172,7 +199,7 @@ return (
                     type="text"
                     id="createname"
                     name="createname"
-                    placeholder="Name"
+                    placeholder='New Name'
                     className={`${
                     errors.name
                         ? 'focus:border-red-400 border-red-400'
@@ -200,7 +227,7 @@ return (
                     type="text"
                     id="Createemail"
                     name="Createemail"
-                    placeholder="Email"
+                    placeholder='New Email'
                     className={`${
                     errors.email
                         ? 'focus:border-red-400 border-red-400'
@@ -223,25 +250,32 @@ return (
                     Password
                 </label>
                 </div>
-                <div className="ml-3 w-4/5">
+                <div className="ml-3 w-4/5 relative">
                 <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     id="Createpass"
                     name="Createpass"
-                    placeholder="Password"
+                    placeholder="New Password"
                     className={`${
                     errors.password
                         ? 'focus:border-red-400 border-red-400'
                         : 'focus:border-sky-900'
-                    } emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-full`}
+                    } emailcustom placeholder:opacity-50 py-3 pl-4 pr-9 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-full`}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
-                {errors.password && (
-                    <p className="text-xs text-red-500 mt-1">
-                    {errors.password}
-                    </p>
-                )}
+                <button
+                    type="button"
+                    className="absolute right-3 top-3"
+                    onClick={() => setShowPassword(!showPassword)}
+                >
+                    {showPassword ? <EyeOff className='text-neutral-300 w-5'/> : <Eye className='text-neutral-300 w-5'/>}
+                </button>
+                    {errors.password && (
+                        <p className="text-xs text-red-500 mt-1">
+                        {errors.password}
+                        </p>
+                    )}
                 </div>
             </div>
             <div className="flex justify-end mt-3">
@@ -274,7 +308,7 @@ return (
         <div className="flex justify-end mt-4">
             <button
             className="active:scale-95 min-w-[22px] form-flex justify-center items-center text-center border py-3 px-2 gap-2 cursor-pointer rounded-md shadow-sm text-white bg-red-600 w-1/5 mt-3 mb-1  font-semibold"
-            onClick={createSubmit}
+            onClick={handleUpdate}
             disabled={isLoading}
             >
             {isLoading ? 'Loading...' : 'Save'}
@@ -286,4 +320,4 @@ return (
 );
 };
 
-export default PopupUser;
+export default PopupUpdateUser;

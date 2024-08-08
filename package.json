@@ -19,8 +19,10 @@
     "@radix-ui/react-tooltip": "^1.1.2",
     "@tanstack/react-table": "^8.19.3",
     "axios": "^1.7.3",
+    "cookie": "^0.6.0",
     "dotenv": "^16.4.5",
     "js-cookie": "^3.0.5",
+    "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.408.0",
@@ -32,7 +34,9 @@
     "zustand": "^4.5.4"
   },
   "devDependencies": {
+    "@types/cookie": "^0.6.0",
     "@types/js-cookie": "^3.0.6",
+    "@types/jsonwebtoken": "^9.0.6",
     "@types/lodash.debounce": "^4.0.9",
     "@types/node": "^20",
     "@types/react": "^18",

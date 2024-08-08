@@ -17,13 +17,16 @@ export default function useAuth() {
     useEffect(() => {
         const token = Cookies.get('authToken');
         if (token) {
-            setAuthToken(token);
             const decoded = decodeToken(token);
-            if (decoded) {
+            if (decoded && decoded.exp * 1000 > new Date().getTime()) {
+                setAuthToken(token);
                 setUser({ name: decoded.name, email: decoded.email, userId: decoded.userId });
+            } else {
+                Cookies.remove('authToken');
+                router.push('/login');
             }
         }
-    }, []);
+    }, [router]);
 
     const login = (token: string) => {
         setAuthToken(token);

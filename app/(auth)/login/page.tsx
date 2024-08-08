@@ -1,4 +1,3 @@
-'use client';
 import React, { useState } from 'react';
 import useAuth from '../../../hooks/useAuth';
 import { useRouter } from 'next/navigation';
@@ -8,6 +7,8 @@ import Telkomsel from '@/public/telkomsel.svg';
 import axios from 'axios';
 import dotenv from 'dotenv';
 import { toast } from 'sonner';
+import Cookies from 'js-cookie';
+
 dotenv.config();
 
 const Login = () => {
@@ -28,7 +29,9 @@ const Login = () => {
         password
       });
       if (response.status === 200) {
-        login(response.data.token, response.data.expiresIn);
+        const { token, expiresIn } = response.data;
+        Cookies.set('authToken', token, { expires: expiresIn / 86400 });
+        login(token);
         router.push('/dashboard');
       }
     } catch (error) {

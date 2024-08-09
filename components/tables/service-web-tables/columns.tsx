@@ -1,7 +1,7 @@
 import React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ColumnDef } from '@tanstack/react-table';
-import { MoveDown, MoveUp, Copy } from 'lucide-react';
+import { MoveDown, MoveUp, Edit, Trash, Copy} from 'lucide-react';
 import { Service } from '@/app/(dashboard)/dashboard/service/page';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -12,46 +12,11 @@ const copyToClipboard = (text: string) => {
   toast.success('Copied to clipboard');
 };
 
+
 export const getColumns = (
   handleDeleteService: (service: Service) => void,
   handleUpdateService: (service: Service) => void,
-  selectedIds: string[], // Add selectedIds as parameter
-  setSelectedIds: React.Dispatch<React.SetStateAction<string[]>> // Add setSelectedIds as parameter
 ): ColumnDef<Service, any>[] => [
-  {
-    id: 'select',
-    header: ({ table }) => (
-      <Checkbox
-        checked={table.getIsAllPageRowsSelected()}
-        onCheckedChange={(value) => {
-          table.toggleAllPageRowsSelected(!!value);
-          if (value) {
-            const allIds = table.getRowModel().rows.map(row => row.original.id);
-            setSelectedIds(allIds);
-          } else {
-            setSelectedIds([]);
-          }
-        }}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => {
-          row.toggleSelected(!!value);
-          if (value) {
-            setSelectedIds(prev => [...prev, row.original.id]);
-          } else {
-            setSelectedIds(prev => prev.filter(id => id !== row.original.id));
-          }
-        }}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false
-  },
   {
     accessorKey: 'name',
     header: ({ column }) => (
@@ -65,6 +30,11 @@ export const getColumns = (
           <MoveDown className="w-4" />
         </button>
       </div>
+    ),
+    cell: ({ row }) => (
+      <Link href={`/dashboard/service/service-web/view-service?id=${row.original.id}`} passHref>
+          {row.original.name}
+      </Link>
     ),
   },
   {
@@ -83,14 +53,18 @@ export const getColumns = (
   },
   {
     id: 'actions',
-    header: '',
+    header: 'Actions',
     cell: ({ row }) => (
-      <Link href={`/dashboard/service/service-web/view-service?id=${row.original.id}`} passHref>
-        <button className='text-gray-500'>
-          View Detail
-        </button>
-      </Link>
-      
+      <div className='flex flex-row gap-4'>
+        <Edit
+          className="cursor-pointer mr-2 h-4 w-4"
+          onClick={() => handleUpdateService(row.original)}
+        />
+        <Trash
+          className="cursor-pointer mr-2 h-4 w-4"
+          onClick={() => handleDeleteService(row.original)} 
+        />
+      </div>
     ),
   },
 ];

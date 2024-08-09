@@ -1,7 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { MoveDown, MoveUp } from 'lucide-react';
-import { Edit, MoreHorizontal, Trash } from 'lucide-react';
-import { CellAction } from './cell-actions';
+import { MoveDown, MoveUp, Edit, Trash} from 'lucide-react';
 import { User } from '@/app/(dashboard)/dashboard/user-management/page';
 
 export const getColumns = (
@@ -50,10 +48,6 @@ export const getColumns = (
     accessorKey: 'actions',
     header: 'Actions',
     cell: (props) => (
-      // <CellAction
-      //   onDelete={() => handleDeleteUser(props.row.original)}
-      //   onUpdate={() => handleUpdateUser(props.row.original)}
-      // />
       <div className='flex flex-row gap-5'>
         <Edit
           className="cursor-pointer mr-2 h-4 w-4"

@@ -69,7 +69,7 @@ export const getColumns = (
   },
   {
     accessorKey: 'gitlabUrl',
-    header: 'gitlabURL',
+    header: 'Gitlab URL',
     cell: ({ row }) => (
       <div className='flex justify-between w-[500px]'>
         <a href={row.original.gitlabUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">

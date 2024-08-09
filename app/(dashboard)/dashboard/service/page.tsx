@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { WebServiceTable } from '@/components/tables/service-web-tables/service-tables';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { AlertModal } from '@/components/modal/alert-modal';
 
 const breadcrumbItems = [
     { title: 'Main', link: '/dashboard' },
@@ -38,11 +39,14 @@ const Page = () => {
     // const limit = Number(searchParams.get('limit') ?? '10');
     const [page, setPage] = useState<number>(1);
     const [limit, setLimit] = useState<number>(10);
+    const [open, setOpen] = useState(false);
     const route = useRouter();
+    const[serviceId, setServiceId] = useState<string | null>(null);
 
-    const handleDeleteService = (service:any) => {
-        deleteSelectedServices(service.id);
-        console.log('Delete service:', service.id);
+    const handleDeleteService = async (service:any) => {
+        setServiceId(service.id);
+        setOpen(true);
+        
     };
 
     const handleUpdateService = (service:any) => {
@@ -99,10 +103,23 @@ const Page = () => {
             toast.error('An error occurred while deleting the service');
         }
     };
+    const onConfirm = () => {
+        if (serviceId) {
+            deleteSelectedServices(serviceId);
+            setServiceId(null);
+        }
+        setOpen(false); 
+    };
     
 
     return (
         <>
+        <AlertModal
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        onConfirm={onConfirm}
+        loading={loading}
+        />
         <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
             <Breadcrumbs items={breadcrumbItems} />
             <div className="flex items-start justify-between">

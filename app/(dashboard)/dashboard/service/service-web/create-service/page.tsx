@@ -88,7 +88,6 @@ const Page = () => {
             }
         } catch (error) {
             console.error('Failed to create service', error);
-            // toast.error('An error occurred while creating service');
 
             if (axios.isAxiosError(error) && error.response) {
                 setErrors(error.response.data.errors || {});

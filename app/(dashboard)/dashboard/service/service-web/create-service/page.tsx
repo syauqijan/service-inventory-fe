@@ -69,10 +69,8 @@ const Page = () => {
     const createSubmit = async (event:any) => {
         event.preventDefault();
         const formIsValid = await validateForm();
-        if (!formIsValid) {
-            return;
-        }
-        setIsLoading(true);
+        if (formIsValid) {
+            setIsLoading(true);
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}`, {
                 userId,
@@ -90,10 +88,17 @@ const Page = () => {
             }
         } catch (error) {
             console.error('Failed to create service', error);
-            toast.error('An error occurred while creating service');
+
+            if (axios.isAxiosError(error) && error.response) {
+                setErrors(error.response.data.errors || {});
+            } else {
+                toast.error('An error occurred while creating service');
+            }
         } finally {
             setIsLoading(false);
         }
+        }
+        
     };
     
 
@@ -131,26 +136,26 @@ const Page = () => {
                             <h3 className='font-medium mb-1'>Service Name</h3>
                             <input type="text" id="serviceName" name="serviceName" value={name} onChange={(e) => setName(e.target.value)}
                                 placeholder="Enter Service Name" className="placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" />
-                            {errors.name && <p className="text-red-500">{errors.name}</p>}
+                            {errors.name && <p className="text-red-500  text-sm font-normal pt-1 pl-1">{errors.name}</p>}
                         </div>
                         <div className=' mt-3'>
                             <h3 className='font-medium mb-1'>Description</h3>
                             <textarea id="serviceDesc" name="serviceDesc" value={description} onChange={(e) => setDescription(e.target.value)}
                                 placeholder="Enter description" className="min-h-20 max-h-20 emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-1/2" ></textarea>
-                            {errors.description && <p className="text-red-500">{errors.description}</p>}
+                            {errors.description && <p className="text-red-500  text-sm font-normal pt-1 pl-1">{errors.description}</p>}
                         </div>
                         <div className='w-2/5 mt-1'>
                             <h3 className='font-medium mb-1'>Gitlab url</h3>
                             <input type="text" id="gitlabUrl" name="gitlabUrl" value={gitlabUrl} onChange={(e) => setGitlabUrl(e.target.value)}
                                 placeholder="Enter link" className="placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5"  />
-                            {errors.gitlabUrl && <p className="text-red-500">{errors.gitlabUrl}</p>}
+                            {errors.gitlabUrl && <p className="text-red-500 text-sm font-normal pt-1 pl-1">{errors.gitlabUrl}</p>}
                         </div>
                         <div className='mt-3 flex justify-center w-1/2'>
                             <div className='w-4/5'>
                                 <h3 className='font-medium mb-1'>Pre-Prod URL</h3>
                                 <input type="text" id="preprodUrl" name="preprodUrl" value={preprodUrl} onChange={(e) => setPreprodUrl(e.target.value)}
                                     placeholder="Enter link" className="placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5"  />
-                                {errors.preprodUrl && <p className="text-red-500">{errors.preprodUrl}</p>}
+                                {errors.preprodUrl && <p className="text-red-500 text-sm font-normal pt-1 pl-1">{errors.preprodUrl}</p>}
                             </div>
                             <div className='w-1/5'>
                                 <p className='mb-2 ml-1 font-medium'>
@@ -177,7 +182,7 @@ const Page = () => {
                                 <h3 className='font-medium mb-1'>Production URL</h3>
                                 <input type="text" id="prodUrl" name="prodUrl" placeholder="Enter link" value={prodUrl} onChange={(e) => setProdUrl(e.target.value)}
                                     className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5"  />
-                                {errors.prodUrl && <p className="text-red-500">{errors.prodUrl}</p>}
+                                {errors.prodUrl && <p className="text-red-500 text-sm font-normal pt-1 pl-1">{errors.prodUrl}</p>}
                             </div>
                             <div className='w-1/5'>
                                 <p className='mb-2 ml-1 font-medium'>

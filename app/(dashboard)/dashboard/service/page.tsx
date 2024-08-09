@@ -13,6 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 import { WebServiceTable } from '@/components/tables/service-web-tables/service-tables';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import { AlertModal } from '@/components/modal/alert-modal';
 
 const breadcrumbItems = [
     { title: 'Main', link: '/dashboard' },
@@ -37,18 +39,21 @@ const Page = () => {
     // const limit = Number(searchParams.get('limit') ?? '10');
     const [page, setPage] = useState<number>(1);
     const [limit, setLimit] = useState<number>(10);
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [open, setOpen] = useState(false);
+    const route = useRouter();
+    const[serviceId, setServiceId] = useState<string | null>(null);
 
-
-    const handleDeleteService = (service:any) => {
-        console.log('Delete service:', service);
+    const handleDeleteService = async (service:any) => {
+        setServiceId(service.id);
+        setOpen(true);
+        
     };
 
     const handleUpdateService = (service:any) => {
-    console.log('Update service:', service);
+        route.push(`/dashboard/service/service-web/update-service?id=${service.id}`);
     };
 
-    const columns = getColumns(handleDeleteService, handleUpdateService, selectedIds, setSelectedIds);
+    const columns = getColumns(handleDeleteService, handleUpdateService);
     
     const fetchData = async () => {
         setLoading(true);
@@ -78,32 +83,43 @@ const Page = () => {
         fetchData();
     }, [debouncedSearchTerm, page, limit]);
     
-    const deleteSelectedServices = async () => {
-        console.log('Selected IDs:', selectedIds);
+    const deleteSelectedServices = async (serviceId: string) => {
+        console.log('Selected ID:', serviceId); 
         try {
             const response = await axios.delete(
-                `${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}`, {
+                `${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}/${serviceId}`, {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    data: {
-                        ids: selectedIds
-                    }
-                });
-
-            if(response.status===200){
-                toast.success('Services deleted successfully');
+                }
+            );
+    
+            if (response.status === 200) {
+                toast.success('Service deleted successfully');
                 fetchData();
-                setSelectedIds([]);
             }
         } catch (error) {
-            console.error('Error deleting services:', error);
-            toast.error('An error occurred while deleting services');
+            console.error('Error deleting service:', error);
+            toast.error('An error occurred while deleting the service');
         }
-    }
+    };
+    const onConfirm = () => {
+        if (serviceId) {
+            deleteSelectedServices(serviceId);
+            setServiceId(null);
+        }
+        setOpen(false); 
+    };
+    
 
     return (
         <>
+        <AlertModal
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        onConfirm={onConfirm}
+        loading={loading}
+        />
         <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
             <Breadcrumbs items={breadcrumbItems} />
             <div className="flex items-start justify-between">
@@ -147,13 +163,10 @@ const Page = () => {
 
                     </Tabs>
                 <div className='absolute w-auto right-0 flex flex-row justify-center items-center gap-6'>
-                    <button className='cursor-pointer' onClick={deleteSelectedServices}>
-                        <Trash className="w-6 h-6 text-gray-500 " />
-                    </button>
                     <Input
                     placeholder="Search service"
                     value={searchTerm}
-                    className="w-[250px] md:max-w-sm text-slate/900"
+                    className="w-[260px] md:max-w-sm text-slate/900"
                     onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>

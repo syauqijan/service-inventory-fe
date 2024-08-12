@@ -205,7 +205,7 @@ export function WebServiceTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  style={{ padding: '8px 8px' }}
                 >
                   There is no data to display
                 </TableCell>

@@ -192,7 +192,7 @@ export function WebServiceTable<TData, TValue>({
                   data-state={row.getIsSelected() && 'selected'}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} style={{ padding: '8px 8px' }}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

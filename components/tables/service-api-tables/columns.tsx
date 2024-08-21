@@ -15,7 +15,7 @@ const copyToClipboard = (text: string) => {
 
 export const getColumnsApi = (
   handleDeleteService: (service: ServiceApi) => void,
-  handleUpdateService: (service: ServiceApi) => void,
+  handleUpdateServiceApi: (service: ServiceApi) => void,
 ): ColumnDef<ServiceApi, any>[] => [
   {
     accessorKey: 'name',
@@ -58,7 +58,7 @@ export const getColumnsApi = (
       <div className='flex flex-row gap-4'>
         <Edit
           className="cursor-pointer mr-2 h-4 w-4"
-          onClick={() => handleUpdateService(row.original)}
+          onClick={() => handleUpdateServiceApi(row.original)}
         />
         <Trash
           className="cursor-pointer mr-2 h-4 w-4"

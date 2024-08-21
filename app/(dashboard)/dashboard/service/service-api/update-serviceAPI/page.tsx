@@ -98,14 +98,14 @@ const Page = () => {
                 <Breadcrumbs items={breadcrumbItems} />
                 <div className="flex items-start justify-between">
                     <Heading
-                        title="Add New Service API"
-                        description="Add a new service API"
+                        title="Update Service API"
+                        description="Update existing service API"
                     />
                 </div>
                 <hr className="border-neutral-200" />
                 <div className='text-sm'>
                     <form>
-                    <div className='w-1/2 border'>
+                    <div className='w-1/2'>
                             <h3 className='font-medium mb-1'>Service Name</h3>
                             <input 
                                 type="text" 

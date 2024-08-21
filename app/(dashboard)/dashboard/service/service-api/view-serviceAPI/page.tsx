@@ -17,6 +17,7 @@ const breadcrumbItems = [
 interface Service {
     id: string;
     name: string;
+    username: string;
     gitlabUrl: string;
     description: string;
     yamlSpec: string;
@@ -42,6 +43,10 @@ interface Service {
         codesmell: string;
         coverage: string;
         duplication: string;
+    }
+    user: {
+        id: string;
+        name: string;
     }
 }
 
@@ -149,6 +154,10 @@ const Page = () => {
                         <div className='mt-4'>
                             <h3 className='font-medium'>Created at</h3>
                             <p className='font-normal mt-2'>{new Date(service.createdAt).toLocaleString()}</p>
+                        </div>
+                        <div className='mt-4'>
+                            <h3 className='font-medium'>Created by</h3>
+                            <p className='font-normal mt-2'>{service.user.name}</p>
                         </div>
                     </div>
                 </div>

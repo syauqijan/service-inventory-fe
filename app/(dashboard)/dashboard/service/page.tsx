@@ -68,8 +68,12 @@ const Page = () => {
         router.push(`/dashboard/service/service-web/update-service?id=${service.id}`);
     };
 
+    const handleUpdateServiceApi = (service: any) => {
+        router.push(`/dashboard/service/service-api/update-serviceAPI?id=${service.id}`);
+    };
+
     const columns = getColumns(handleDeleteService, handleUpdateService);
-    const columnsApi = getColumnsApi(handleDeleteServiceApi, handleUpdateService);
+    const columnsApi = getColumnsApi(handleDeleteServiceApi, handleUpdateServiceApi);
 
     const fetchData = async () => {
         setLoading(true);

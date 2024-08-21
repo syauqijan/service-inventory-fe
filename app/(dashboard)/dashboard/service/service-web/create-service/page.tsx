@@ -120,7 +120,7 @@ const Page = () => {
     
 
     return (
-        <div className='flex max-h-screen overflow-y-auto '>
+        <div className='flex overflow-y-auto '>
             <div className="flex-1 space-y-4 p-4 md:p-8">
                 <Breadcrumbs items={breadcrumbItems} />
                 <div className="flex items-start justify-between">
@@ -144,7 +144,7 @@ const Page = () => {
                                 placeholder="Enter description" className="min-h-20 max-h-20 emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-1/2" ></textarea>
                             {errors.description && <p className="text-red-500  text-sm font-normal pt-1 pl-1">{errors.description}</p>}
                         </div>
-                        <div className='w-2/5 mt-1'>
+                        <div className='w-2/5 mt-3'>
                             <h3 className='font-medium mb-1'>Gitlab url</h3>
                             <input type="text" id="gitlabUrl" name="gitlabUrl" value={gitlabUrl} onChange={(e) => setGitlabUrl(e.target.value)}
                                 placeholder="Enter link" className="placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5"  />

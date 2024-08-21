@@ -11,8 +11,8 @@ import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { SkeletonTable } from '@/components/tables/skeleton-tables';
 import { useDebounce } from '@/hooks/useDebounce'; 
-import {getColumns} from '@/components/tables/user-tables/columns';
-import { useSearchParams } from 'next/navigation';
+import { getColumns } from '@/components/tables/user-tables/columns';
+import { useSearchParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 
 export interface User {
@@ -41,13 +41,15 @@ const Page = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [totalUsers, setTotalUsers] = useState<number>(0);
-  const searchParams = useSearchParams();
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
-  // const page = Number(searchParams.get('page') ?? '1');
-  // const limit = Number(searchParams.get('limit') ?? '10');
-  const [page, setPage] = useState<number>(1);
-  const [limit, setLimit] = useState<number>(10);
 
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  // Ambil nilai page dan limit dari URL
+  const page = Number(searchParams.get('page') ?? '1');
+  const limit = Number(searchParams.get('limit') ?? '10');
 
   const fetchData = async () => {
     setLoading(true);
@@ -67,7 +69,6 @@ const Page = () => {
         setError('Failed to fetch users');
         return;
       }
-
 
       setData(response.data.users);
       setTotalUsers(response.data.total);
@@ -132,7 +133,7 @@ const Page = () => {
           setData(data.filter((user) => user.id !== selectedUser.id));
           handleCloseDeleteModal();
           toast.success('User deleted successfully');
-        }else{
+        } else {
           setError('Failed to delete user');
           toast.error('User deletion error');
         }
@@ -182,6 +183,7 @@ const Page = () => {
             totalUsers={totalUsers}
             pageCount={Math.ceil(totalUsers / limit)}
             pageSizeOptions={[10, 20, 30, 40, 50]}
+            limit={limit}  // Tambahkan limit sebagai prop untuk UserTable
           />
         )}
       </div>

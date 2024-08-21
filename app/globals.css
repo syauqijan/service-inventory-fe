@@ -2,6 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Scrollbar untuk browser berbasis WebKit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px; /* Lebar scrollbar */
+}
+
+/* Track scrollbar */
+::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Warna track */
+}
+
+/* Handle scrollbar */
+::-webkit-scrollbar-thumb {
+  background: #a12828; /* Warna handle */
+  border-radius: 10px; /* Membuat handle lebih bulat */
+}
+
+
+
+/* Scrollbar untuk Firefox */
+* {
+  scrollbar-width: thin; /* Ukuran scrollbar menjadi tipis */
+  scrollbar-color: #a12828 #f1f1f1; /* Warna handle dan track */
+}
+
+.swagger-ui{
+  margin: 0cm !important;
+  padding: 0cm !important;
+}
+
 /* :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;

@@ -2,19 +2,21 @@
 import React, { useEffect, useState } from 'react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Heading } from '@/components/ui/heading';
-import { Plus, Trash } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { SkeletonTable } from '@/components/tables/skeleton-tables';
 import { useDebounce } from '@/hooks/useDebounce'; 
-import {getColumns} from '@/components/tables/service-web-tables/columns';
-import { useSearchParams } from 'next/navigation';
+import { getColumns } from '@/components/tables/service-web-tables/columns';
+import { getColumnsApi } from '@/components/tables/service-api-tables/columns';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 import { WebServiceTable } from '@/components/tables/service-web-tables/service-tables';
+import { ApiServiceTable } from '@/components/tables/service-api-tables/service-api-tables';
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
 import { AlertModal } from '@/components/modal/alert-modal';
+import { AlertModalApi } from '@/components/modal/alert-api-modal';
 
 const breadcrumbItems = [
     { title: 'Main', link: '/dashboard' },
@@ -27,34 +29,48 @@ export interface Service {
     gitlabUrl: string;
 }
 
+export interface ServiceApi {
+    id: string;
+    name: string;
+    gitlabUrl: string;
+}
+
 const Page = () => {
     const [data, setData] = useState<Service[]>([]);
+    const [dataApi, setDataApi] = useState<ServiceApi[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [totalServices, setTotalServices] = useState<number>(0);
+    const [totalServiceApi, setTotalServiceApi] = useState<number>(0);
     const searchParams = useSearchParams();
-    const debouncedSearchTerm = useDebounce(searchTerm, 500);
-    // const page = Number(searchParams.get('page') ?? '1');
-    // const limit = Number(searchParams.get('limit') ?? '10');
-    const [page, setPage] = useState<number>(1);
-    const [limit, setLimit] = useState<number>(10);
-    const [open, setOpen] = useState(false);
-    const route = useRouter();
-    const[serviceId, setServiceId] = useState<string | null>(null);
+    const router = useRouter();
 
-    const handleDeleteService = async (service:any) => {
+    const debouncedSearchTerm = useDebounce(searchTerm, 500);
+    const page = Number(searchParams.get('page') ?? '1');
+    const limit = Number(searchParams.get('limit') ?? '10');
+
+    const [open, setOpen] = useState(false);
+    const [openApi, setOpenApi] = useState(false);
+    const [serviceId, setServiceId] = useState<string | null>(null);
+
+    const handleDeleteService = async (service: any) => {
         setServiceId(service.id);
         setOpen(true);
-        
     };
 
-    const handleUpdateService = (service:any) => {
-        route.push(`/dashboard/service/service-web/update-service?id=${service.id}`);
+    const handleDeleteServiceApi = async (serviceApi: any) => {
+        setServiceId(serviceApi.id);
+        setOpenApi(true);
+    };
+
+    const handleUpdateService = (service: any) => {
+        router.push(`/dashboard/service/service-web/update-service?id=${service.id}`);
     };
 
     const columns = getColumns(handleDeleteService, handleUpdateService);
-    
+    const columnsApi = getColumnsApi(handleDeleteServiceApi, handleUpdateService);
+
     const fetchData = async () => {
         setLoading(true);
         try {
@@ -62,29 +78,48 @@ const Page = () => {
                 params: {
                     search: debouncedSearchTerm,
                     page,
-                    limit
+                    limit,
                 },
                 headers: {
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                },
             });
 
-            setData(response.data.services)
-            setTotalServices(response.data.total)
+            setData(response.data.services);
+            setTotalServices(response.data.total);
         } catch (error) {
             console.error('Error fetching services:', error);
             setError('An error occurred while fetching services');
         } finally {
-            setLoading(false);
+            try {
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICEAPIS}`, {
+                    params: {
+                        search: debouncedSearchTerm,
+                        page,
+                        limit,
+                    },
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                setDataApi(response.data.serviceapi);
+                setTotalServiceApi(response.data.total);
+            } catch (error) {
+                console.error('Error fetching service APIs:', error);
+                setError('An error occurred while fetching service APIs');
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
     useEffect(() => {
         fetchData();
     }, [debouncedSearchTerm, page, limit]);
-    
+
     const deleteSelectedServices = async (serviceId: string) => {
-        console.log('Selected ID:', serviceId); 
+        console.log('Selected ID:', serviceId);
         try {
             const response = await axios.delete(
                 `${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}/${serviceId}`, {
@@ -93,7 +128,7 @@ const Page = () => {
                     },
                 }
             );
-    
+
             if (response.status === 200) {
                 toast.success('Service deleted successfully');
                 fetchData();
@@ -103,79 +138,128 @@ const Page = () => {
             toast.error('An error occurred while deleting the service');
         }
     };
+
+    const deleteSelectedServiceApi = async (serviceId: string) => {
+        console.log('Selected ID:', serviceId);
+        try {
+            const response = await axios.delete(
+                `${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICEAPIS}/${serviceId}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+
+            if (response.status === 200) {
+                toast.success('Api service deleted successfully');
+                fetchData();
+            }
+        } catch (error) {
+            console.error('Error deleting service:', error);
+            toast.error('An error occurred while deleting the Api service');
+        }
+    };
+
     const onConfirm = () => {
         if (serviceId) {
             deleteSelectedServices(serviceId);
             setServiceId(null);
         }
-        setOpen(false); 
+        setOpen(false);
     };
-    
+
+    const onConfirmApi = () => {
+        if (serviceId) {
+            deleteSelectedServiceApi(serviceId);
+            setServiceId(null);
+        }
+        setOpenApi(false);
+    };
 
     return (
         <>
-        <AlertModal
-        isOpen={open}
-        onClose={() => setOpen(false)}
-        onConfirm={onConfirm}
-        loading={loading}
-        />
-        <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
-            <Breadcrumbs items={breadcrumbItems} />
-            <div className="flex items-start justify-between">
-            <Heading
-                title="Service"
-                description="Create and manage services"
+            <AlertModal
+                isOpen={open}
+                onClose={() => setOpen(false)}
+                onConfirm={onConfirm}
+                loading={loading}
             />
-            <Link
-                href={'/dashboard/service/service-web/create-service'}
-                className="w-[118px] h-10 px-4 py-2 bg-RedTint/900 rounded-md justify-center items-center inline-flex text-white text-sm font-medium"
-            >
-                <Plus className="mr-2 h-4 w-4" /> Add New
-            </Link>
-            </div>
-            <hr className="border-neutral-200" />
+            <AlertModalApi
+                isOpenApi={openApi}
+                onCloseApi={() => setOpenApi(false)}
+                onConfirmApi={onConfirmApi}
+                loading={loading}
+            />
+            <Tabs defaultValue="web" className="flex-1 space-y-4 p-4 pt-6 md:p-8">
+                <Breadcrumbs items={breadcrumbItems} />
+                <div className="flex items-start justify-between">
+                    <Heading title="Service" description="Create and manage services" />
+                    <div>
+                        <TabsContent value="web">
+                            <Link href={'/dashboard/service/service-web/create-service'}
+                                className="h-10 px-4 py-2 bg-RedTint/900 rounded-md justify-center items-center inline-flex text-white text-sm font-medium">
+                                <Plus className="mr-2 h-4 w-4" /> Add New Service Web
+                            </Link>
+                        </TabsContent>
+                        <TabsContent value="api">
+                            <Link href={'/dashboard/service/service-api/create-serviceAPI'}
+                                className="ml-4 h-10 px-4 py-2 bg-RedTint/900 rounded-md justify-center items-center inline-flex text-white text-sm font-medium">
+                                <Plus className="mr-2 h-4 w-4" /> Add New Service API
+                            </Link>
+                        </TabsContent>
+                    </div>
+                </div>
+                <hr className="border-neutral-200" />
 
-            <div className='relative flex flex-row'>
-                    <Tabs defaultValue="web" className="space-y-4 w-full">
+                <div className="relative flex flex-row">
+                    <div className="space-y-4 w-full">
                         <TabsList>
                             <TabsTrigger value="web">Web</TabsTrigger>
                             <TabsTrigger value="api">API</TabsTrigger>
                         </TabsList>
                         <TabsContent value="web">
                             {loading ? (
-                            <SkeletonTable />
+                                <SkeletonTable />
                             ) : (
-                            <WebServiceTable
-                                columns={columns}
-                                data={data}
-                                searchKey="name"
-                                pageNo={page}
-                                totalItems={totalServices}
-                                pageCount={Math.ceil(totalServices / limit)}
-                                pageSizeOptions={[10, 20, 30, 40, 50]}
-                            />
+                                <WebServiceTable
+                                    columns={columns}
+                                    data={data}
+                                    searchKey="name"
+                                    pageNo={page}
+                                    totalItems={totalServices}
+                                    pageCount={Math.ceil(totalServices / limit)}
+                                    pageSizeOptions={[10, 20, 30, 40, 50]}
+                                />
                             )}
                         </TabsContent>
                         <TabsContent value="api">
-                            <p>API</p>
+                            {loading ? (
+                                <SkeletonTable />
+                            ) : (
+                                <ApiServiceTable
+                                    columns={columnsApi}
+                                    data={dataApi}
+                                    searchKey="name"
+                                    pageNo={page}
+                                    totalItems={totalServiceApi}
+                                    pageCount={Math.ceil(totalServiceApi / limit)}
+                                    pageSizeOptions={[10, 20, 30, 40, 50]}
+                                />
+                            )}
                         </TabsContent>
-
-                    </Tabs>
-                <div className='absolute w-auto right-0 flex flex-row justify-center items-center gap-6'>
-                    <Input
-                    placeholder="Search service"
-                    value={searchTerm}
-                    className="w-[260px] md:max-w-sm text-slate/900"
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+                    </div>
+                    <div className="absolute w-auto right-0 flex flex-row justify-center items-center gap-6">
+                        <Input
+                            placeholder="Search service"
+                            value={searchTerm}
+                            className="w-[260px] md:max-w-sm text-slate/900"
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
                 </div>
-            </div>
-        </div>
-    </>
-        
-    
+            </Tabs>
+        </>
     );
-}
+};
 
 export default Page;

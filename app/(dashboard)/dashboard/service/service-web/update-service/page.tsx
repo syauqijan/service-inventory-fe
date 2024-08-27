@@ -19,6 +19,7 @@ interface ValidationErrors {
     description?: string;
     preprodUrl?: string;
     prodUrl?: string;
+    versionService?: string;
 }
 
 const Page = () => {
@@ -31,6 +32,7 @@ const Page = () => {
     const userId = user?.userId;
     const [gitlabUrl, setGitlabUrl] = useState<string>('');
     const [name, setName] = useState<string>('');
+    const [versionService, setversionService] = useState<string>('');
     const [description, setDescription] = useState<string>('');
     const [preprodUrl, setPreprodUrl] = useState<string>('');
     const [preprodUrlStatus, setPreprodUrlStatus] = useState<string>('inactive');
@@ -44,6 +46,7 @@ const Page = () => {
         setGitlabUrl(data.gitlabUrl);
         setDescription(data.description);
         setPreprodUrl(data.preprodUrl);
+        setversionService(data.versionService);
         setPreprodUrlStatus(data.preprodUrlStatus);
         setProdUrl(data.prodUrl);
         setProdUrlStatus(data.prodUrlStatus);
@@ -90,6 +93,10 @@ const Page = () => {
             err.prodUrl = 'URL must be filled';
             isValid = false;
         }
+        if (!versionService) {
+            err.versionService = 'Version must be filled';
+            isValid = false;
+        }
         setErrors(err);
         return isValid;
     }
@@ -108,7 +115,8 @@ const Page = () => {
                     preprodUrlStatus,
                     prodUrl,
                     prodUrlStatus,
-                    userId
+                    userId,
+                    versionService
                 });
 
                 if (response.status === 200) {
@@ -168,6 +176,12 @@ const Page = () => {
                             <textarea id="seviceDesc" name="seviceDesc" value={description} onChange={(e) => setDescription(e.target.value)}
                                 placeholder="Enter description" className="min-h-20 max-h-20 emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-1/2" required></textarea>
                             {errors.description && <p className="text-red-500  text-sm font-normal pt-1 pl-1">{errors.description}</p>}
+                        </div>
+                        <div className='w-2/5'>
+                            <h3 className='font-medium mb-1'>Version</h3>
+                            <input type="text" id="versionService" name="versionService" value={versionService} onChange={(e) => setversionService(e.target.value)}
+                                placeholder="Enter Service Name" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" required />
+                            {errors.versionService && <p className="text-red-500  text-sm font-normal pt-1 pl-1">{errors.versionService}</p>}
                         </div>
                         <div className='w-2/5 mt-1'>
                             <h3 className='font-medium mb-1'>Gitlab url</h3>

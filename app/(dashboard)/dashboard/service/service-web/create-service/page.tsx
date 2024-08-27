@@ -23,6 +23,7 @@ interface ValidationErrors {
     description?: string;
     preprodUrl?: string;
     prodUrl?: string;
+    versionService?: string;
 }
 
 const Page = () => {
@@ -34,6 +35,7 @@ const Page = () => {
     const [gitlabUrl, setGitlabUrl] = useState<string>('');
     const [name, setName] = useState<string>('');
     const [description, setDescription] = useState<string>('');
+    const [versionService, setversionService] = useState<string>('');
     const [preprodUrl, setPreprodUrl] = useState<string>('');
     const [preprodUrlStatus, setPreprodUrlStatus] = useState<string>('inactive');
     const [prodUrl, setProdUrl] = useState<string>('');
@@ -53,6 +55,10 @@ const Page = () => {
         }
         if (!description) {
             err.description = 'Description must be filled';
+            isValid = false;
+        }
+        if (!versionService) {
+            err.versionService = 'versionService must be filled';
             isValid = false;
         }
         if (!preprodUrl) {
@@ -80,7 +86,8 @@ const Page = () => {
                 preprodUrl,
                 preprodUrlStatus,
                 prodUrl,
-                prodUrlStatus
+                prodUrlStatus,
+                versionService
             });
             if(response.status===201){
                 router.push('/dashboard/service');
@@ -143,6 +150,12 @@ const Page = () => {
                             <textarea id="serviceDesc" name="serviceDesc" value={description} onChange={(e) => setDescription(e.target.value)}
                                 placeholder="Enter description" className="min-h-20 max-h-20 emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-1/2" ></textarea>
                             {errors.description && <p className="text-red-500  text-sm font-normal pt-1 pl-1">{errors.description}</p>}
+                        </div>
+                        <div className='w-2/5 mt-3'>
+                            <h3 className='font-medium mb-1'>versionService</h3>
+                            <input type="text" id="serviceName" name="serviceName" value={versionService} onChange={(e) => setversionService(e.target.value)}
+                                placeholder="Enter Service Name" className="placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" />
+                            {errors.versionService && <p className="text-red-500  text-sm font-normal pt-1 pl-1">{errors.versionService}</p>}
                         </div>
                         <div className='w-2/5 mt-3'>
                             <h3 className='font-medium mb-1'>Gitlab url</h3>

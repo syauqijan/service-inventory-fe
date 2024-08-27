@@ -1,54 +1,63 @@
 import React from 'react';
 import DataTable, { TableColumn } from 'react-data-table-component';
-import { DataRow } from './types';
+import { ApiDetails } from './types';
 
 interface DataTableComponentProps {
-    data: DataRow[];
-    onDetailClick: (data: DataRow) => void;
+    data: ApiDetails[];
+    onDetailClick: (data: ApiDetails) => void;
 }
 
 const DataTableComponent: React.FC<DataTableComponentProps> = ({ data, onDetailClick }) => {
-    const columns: TableColumn<DataRow>[] = [
+
+    const columns: TableColumn<ApiDetails>[] = [
         {
             name: 'Method',
-            selector: (row: DataRow) => row.method,
+            selector: row => row.method,
             sortable: true,
             maxWidth: '250px',
         },
         {
             name: 'Endpoint',
-            selector: (row: DataRow) => row.endpoint,
+            selector: row => row.endpoint,
             sortable: true,
         },
         {
             name: 'Status',
-            selector: (row: DataRow) => row.status,
+            selector: row => row.status,
             sortable: true,
             maxWidth: '250px',
         },
         {
             name: 'Actions',
-            cell: (row: DataRow) => (
-                <button onClick={() => onDetailClick(row)}>Detail</button>
+            cell: row => (
+                <button onClick={() => onDetailClick(row)}>
+                    Edit
+                </button>
             ),
             ignoreRowClick: true,
             allowOverflow: true,
             button: true,
-            maxWidth: '250px',
+            width: '200px',
         },
     ];
 
     return (
-        <DataTable<DataRow>
+        <div>
+        <DataTable
             columns={columns}
             data={data}
             pagination
             highlightOnHover
+            pointerOnHover
+            selectableRowsHighlight
+            subHeader
+            keyField="id" // Ensure each row has a unique key
+
             customStyles={{
                 headCells: {
                     style: {
                         fontSize: '15px',
-                        fontWeight: '600',
+                        fontWeight: '700',
                         textAlign: 'center', // Mengatur teks header kolom "Status" ke tengah    
                     },
                 },
@@ -59,9 +68,10 @@ const DataTableComponent: React.FC<DataTableComponentProps> = ({ data, onDetailC
                     },
                 },
             }}
-            className="w-full border-collapse"
+            className="w-full border-collapse -mt-10 border-t"
         />
-    );
+        </div>
+);
 };
 
 export default DataTableComponent;

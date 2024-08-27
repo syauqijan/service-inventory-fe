@@ -49,6 +49,7 @@ const Page = () => {
         service_name: '',
         description: '',
         gitlabURL: '',
+        versionService: '',
         qualityGateStatus: '',
         vulnerabilities: '',
         coverage: '',
@@ -71,6 +72,7 @@ const Page = () => {
         if (!formData.get('service_name')) newErrors.service_name = 'Service name must be filled';
         if (!formData.get('description')) newErrors.description = 'Description must be filled';
         if (!formData.get('gitlabURL')) newErrors.gitlabURL = 'Gitlab URL must be filled';
+        if (!formData.get('versionService')) newErrors.versionService = 'versionService must be filled';
         if (!formData.get('qualityGateStatus')) newErrors.qualityGateStatus = 'Status gate must be filled';
         if (!formData.get('vulnerabilities')) newErrors.vulnerabilities = 'Data must be filled';
         if (!formData.get('coverage')) newErrors.coverage = 'Data must be filled';
@@ -202,6 +204,7 @@ const Page = () => {
                 name: formData.get('service_name'),
                 description: formData.get('description'),
                 gitlabUrl: formData.get('gitlabURL'),
+                versionService: formData.get('versionService'),
                 yamlSpec: yamlValue,
                 sonarCubeId,
                 unitTestingId,
@@ -323,7 +326,16 @@ const Page = () => {
                             />
                             {errors.yamlSpec && <p className="text-red-600 text-sm mt-1">{errors.yamlSpec}</p>}
                         </div>
-
+                        <div className='w-1/2 mt-3'>
+                            <h3 className='font-medium mb-1'>Version</h3>
+                            <input 
+                                type="text" 
+                                name='versionService' 
+                                placeholder="Enter versionService" 
+                                className={`emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid ${errors.versionService ? 'border-red-600' : 'border-neutral-300'} focus:outline-none w-2/3`} 
+                            />
+                            {errors.versionService && <p className="text-red-600 text-sm mt-1">{errors.versionService}</p>}
+                        </div>
                         <div className='mt-10'>
                             <h1 className='text-xl font-semibold mt-3'>
                                 Sonarqube

@@ -15,6 +15,7 @@ const breadcrumbItems = [
 ];
 
 interface Service {
+    version: string;
     id: string;
     name: string;
     username: string;
@@ -31,9 +32,9 @@ interface Service {
         testCasePassed: string;
         testCaseFailed: string;
         coverageStatement: number;
-        CoverageBranch: string;
+        coverageBranch: string;
         coverageFunction: string;
-        CoverageLines: string;
+        coverageLines: string;
     };
     sonarqube: {
         id: string;
@@ -52,13 +53,13 @@ interface Service {
 
 const Page = () => {
     const [progressColor, setProgressColor] = useState('');
+    const [versionArray, setVersionArray] = useState<string[]>([]);
 
     // Fetching Data
     const searchParams = useSearchParams();
     const router = useRouter();
     const id = searchParams.get('id');
     const [service, setService] = useState<Service | null>(null);
-    const [api, setApi] = useState<Service | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -80,13 +81,17 @@ const Page = () => {
             } else {
                 setProgressColor('bg-red-500');
             }
+
+            const versionMain = response.data.versionService;
+            const versions = versionMain.split(',');
+            setVersionArray(versions);
+            
         } catch (error) {
             console.error(error);
         } finally {
             setLoading(false);
         }
     };
-
 
     if (loading) {
         return <div>Loading...</div>;
@@ -126,10 +131,8 @@ const Page = () => {
                         </div>
                         <div className='mt-6'>
                             <h3 className='font-medium mb-2'>Gitlab URL</h3>
-                            <Link href={`${service.gitlabUrl}`} className='cursor-default font-normal flex items-center text-blue-600 w-5/6'>
-                                <p className='underline mr-1 cursor-pointer'>
-                                    {service.gitlabUrl}
-                                </p>
+                            <Link href={`${service.gitlabUrl}`} className='underline cursor-pointer font-normal flex w-fit text-blue-600'>
+                                {service.gitlabUrl}
                                 <ArrowUpRight fontSize="1.5em" />
                             </Link>
                         </div>
@@ -158,6 +161,14 @@ const Page = () => {
                         <div className='mt-4'>
                             <h3 className='font-medium'>Created by</h3>
                             <p className='font-normal mt-2'>{service.user.name}</p>
+                        </div>
+                        <div className='mt-4'>
+                            <h3 className='font-medium'>Version</h3>
+                            <div className="flex flex-wrap">
+                                {versionArray.map((version, index) => (
+                                    <p key={index} className='font-normal mt-2 flex-1 min-w-[50%]'>{version}</p>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -202,15 +213,15 @@ const Page = () => {
                             <div className='border mx-2 mb-3 px-3 pt-3 pb-1 rounded-md shadow'>
                                 <h1 className='text-center'>Coverage Statement</h1>
                                 <p className='text-center text-2xl mt-2 font-semibold'>{service.unit_testing.coverageStatement}%</p>
-                                <div className= {`h-2.5 rounded-full w-full ${progressColor}`}></div>
+                                <div className={`h-2.5 rounded-full w-full ${progressColor}`}></div>
                             </div>
                             <div className='border mx-2 mb-3 p-3 rounded-md shadow'>
                                 <h1 className='text-center'>Coverage Branch</h1>
-                                <p className='text-center text-2xl mt-3 font-semibold'>{service.unit_testing.CoverageBranch}%</p>
+                                <p className='text-center text-2xl mt-3 font-semibold'>{service.unit_testing.coverageBranch}%</p>
                             </div>
                             <div className='border mx-2 mb-3 p-3 rounded-md shadow'>
                                 <h1 className='text-center'>Coverage Lines</h1>
-                                <p className='text-center text-2xl mt-3 font-semibold'>{service.unit_testing.CoverageLines}%</p>
+                                <p className='text-center text-2xl mt-3 font-semibold'>{service.unit_testing.coverageLines}%</p>
                             </div>
                             <div className='border mx-2 p-3 rounded-md shadow'>
                                 <h1 className='text-center'>Coverage Function</h1>
@@ -231,7 +242,7 @@ const Page = () => {
                     <h1 className='text-2xl font-semibold mt-16'>APIs</h1>
                     <p className='pt-2 text-sm font-normal text-slate-500'>API connected to this service</p>
                 </div>
-                    <ServiceAPIPage serviceApiId={service.id} />
+                <ServiceAPIPage serviceApiId={service.id} />
             </div>
         </div>
     );

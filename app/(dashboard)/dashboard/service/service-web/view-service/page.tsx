@@ -22,6 +22,7 @@ interface Service {
     prodUrlStatus: string;
     createdAt: string;
     updatedAt: string;
+    version: string;
     userId: string;
     user: {
         name: string;
@@ -42,6 +43,8 @@ const Page = () => {
     const [service, setService] = useState<Service | null>(null);
     const [loading, setLoading] = useState(true);
 
+    const [versionArray, setVersionArray] = useState<string[]>([]);
+
     useEffect(() => {
         if (id) {
             fetchServiceData(id);
@@ -52,6 +55,9 @@ const Page = () => {
         try {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICES}/${serviceId}`);
             setService(response.data);
+            const versionMain = response.data.versionService;
+            const versions = versionMain.split(','); 
+            setVersionArray(versions);
         } catch (error) {
             console.error(error);
         } finally {
@@ -122,6 +128,14 @@ const Page = () => {
                         <div className='mt-4'>
                             <h3 className='font-medium'>Updated by</h3>
                             <p className='font-normal mt-1'>{service.user.name}</p>
+                        </div>
+                        <div className='mt-4'>
+                            <h3 className='font-medium'>Version</h3>
+                            <div className="flex flex-wrap">
+                                {versionArray.map((version, index) => (
+                                    <p key={index} className='font-normal mt-2 flex-1 min-w-[50%]'>{version}</p>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>

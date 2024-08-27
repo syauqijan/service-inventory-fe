@@ -1,60 +1,51 @@
-'use client';
-import React, { useState, useEffect } from 'react';
+"use client";
+
+import React, { useState, useEffect } from "react";
+import axios from 'axios';
+import DataTableComponent from './DataTableComponent';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Heading } from '@/components/ui/heading';
-import { ArrowUpRight, SquarePen, Copy } from 'lucide-react';
+import DetailModal from "./DetailModal";
+import EditServiceForm from '@/components/form/EditServiceForm';
+import MonacoEditor from '@monaco-editor/react';
+import { ApiDetails } from './types';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import axios from 'axios';
-import ServiceAPIPage from '@/components/tables/service-api-detail-tables/page';
+import { Plus } from "lucide-react";
+import { toast } from "sonner";
+
+interface ServiceAPIPageProps {
+    params: {
+        serviceApiId: string;
+    };
+}
 
 const breadcrumbItems = [
     { title: 'Main', link: '/dashboard' },
     { title: 'Service', link: '/dashboard/service' },
-    { title: 'Service API update', link: '/dashboard/service/service-api/update-serviceAPI' }
+    { title: 'Edit Service API', link: '/dashboard/service/service-web/update-serviceAPI' }
 ];
 
-interface Service {
-    id: string;
-    name: string;
-    gitlabUrl: string;
-    description: string;
-    yamlSpec: string;
-    serviceApiDetailId: string;
-    sonarCubeId: string;
-    unitTestingId: string;
-    updatedAt: string;
-    createdAt: string;
-    unit_testing: {
-        id: string;
-        testCasePassed: string;
-        testCaseFailed: string;
-        coverageStatement: number;
-        CoverageBranch: string;
-        coverageFunction: string;
-        CoverageLines: string;
-    };
-    sonarqube: {
-        id: string;
-        qualityGateStatus: string;
-        bugs: string;
-        vulnerabilities: string;
-        codesmell: string;
-        coverage: string;
-        duplication: string;
-    }
-}
+const generateTempId = () => `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-const Page = () => {
-    const [progressColor, setProgressColor] = useState('');
-
-    // Fetching Data
-    const searchParams = useSearchParams();
+const ServiceAPIPage: React.FC<ServiceAPIPageProps> = ({ params }) => {
+    const { serviceApiId } = params;
     const router = useRouter();
+    const searchParams = useSearchParams();
     const id = searchParams.get('id');
-    const [service, setService] = useState<Service | null>(null);
-    const [api, setApi] = useState<Service | null>(null);
+
+    const [existingApiData, setExistingApiData] = useState<ApiDetails[]>([]);
+    const [newApiData, setNewApiData] = useState<ApiDetails[]>([]);
+    const [apiLoading, setApiLoading] = useState(true);
+    const [apiSearch, setApiSearch] = useState("");
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedApiDetails, setSelectedApiDetails] = useState<ApiDetails | null>(null);
+    const [isCreating, setIsCreating] = useState(false);
+    const [initialData, setInitialData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+
+    const [yamlSpec, setYamlSpec] = useState(''); 
+    const [tempYamlSpec, setTempYamlSpec] = useState(''); 
+    const [yamlEditorOpen, setYamlEditorOpen] = useState(false); 
 
     useEffect(() => {
         if (id) {
@@ -65,240 +56,274 @@ const Page = () => {
     const fetchServiceData = async (serviceId: string) => {
         try {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICEAPIS}/${serviceId}`);
-            setService(response.data);
-
-            const cover = response.data.unit_testing.coverageStatement;
-            if (cover > 80) {
-                setProgressColor('bg-green-500');
-            } else if (cover >= 70) {
-                setProgressColor('bg-yellow-400');
-            } else {
-                setProgressColor('bg-red-500');
-            }
+            setInitialData(response.data);
+            setYamlSpec(response.data.yamlSpec || '');
+            setTempYamlSpec(response.data.yamlSpec || '');
+            fetchApiData(serviceId); 
+            setLoading(false); 
         } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
+            console.error('Error fetching service data:', error);
+            setLoading(false); 
         }
     };
 
+    const fetchApiData = async (serviceId: string) => {
+        try {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_ENDPOINT_APIS}/${serviceId}`);
+            setExistingApiData(response.data.rows || []); 
+            setApiLoading(false); 
+        } catch (error) {
+            console.error('Error fetching API data:', error);
+            setApiLoading(false); 
+        }
+    };
 
-    if (loading) {
+    const handleOpenModal = (data: ApiDetails | null = null) => {
+        if (data === null) {
+            data = {
+                id: generateTempId(),
+                endpoint: '',
+                version: '',
+                method: '',
+                platform: '',
+                status: 'inactive',
+                description: '',
+                isNew: true, // New API is marked as isNew = true
+            };
+        }
+    
+        setSelectedApiDetails(data);
+        setIsCreating(!!data.isNew); // Convert isNew to boolean explicitly
+        setModalOpen(true);
+    };
+    
+
+    const handleCloseModal = () => {
+        setModalOpen(false);
+        setSelectedApiDetails(null);
+    };
+
+    const handleSaveLocal = (data: ApiDetails, isNew: boolean) => {
+        console.log("Saving API data locally:", data, "Is new:", isNew);
+    
+        // Convert ID to string to safely use startsWith method
+        const idAsString = String(data.id);
+    
+        // Determine if the API is new based on the presence of the `isNew` flag or an ID that starts with 'temp-'
+        const isNewAPI = isNew || idAsString.startsWith('temp-');
+    
+        if (isNewAPI) {
+            data.isNew = true; // Ensure isNew is set to true
+            setNewApiData(prevData => {
+                const updatedData = [...prevData.filter(item => item.id !== data.id), data];
+                console.log("Updated newApiData after adding new API:", updatedData);
+                return updatedData;
+            });
+        } else {
+            setExistingApiData(prevData => {
+                const updatedData = prevData.map(item => 
+                    item.id === data.id ? { ...data, isModified: true, isNew: false } : item
+                );
+                console.log("Updated existingApiData after editing API:", updatedData);
+                return updatedData;
+            });
+        }
+    
+        setModalOpen(false);
+    };
+    
+    
+
+    const handleUpdate = async (updatedData: any) => {
+        try {
+            const requests = [];
+    
+            // Update service API data
+            requests.push(
+                axios.patch(
+                    `${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICEAPIS}/${id}`,
+                    {
+                        name: updatedData.name,
+                        description: updatedData.description,
+                        gitlabUrl: updatedData.gitlabUrl,
+                        versionService: updatedData.versionService,
+                        yamlSpec: yamlSpec,
+                    }
+                )
+            );
+    
+            // Update unit_testing data
+            if (updatedData.unit_testing) {
+                requests.push(
+                    axios.patch(
+                        `${process.env.NEXT_PUBLIC_API_ENDPOINT_UNITTESTING}/${updatedData.unit_testing.id}`,
+                        updatedData.unit_testing
+                    )
+                );
+            }
+    
+            // Update sonarqube data
+            if (updatedData.sonarqube) {
+                requests.push(
+                    axios.patch(
+                        `${process.env.NEXT_PUBLIC_API_ENDPOINT_SONARQUBE}/${updatedData.sonarqube.id}`,
+                        updatedData.sonarqube
+                    )
+                );
+            }
+    
+            // Create new APIs
+            for (const apiData of newApiData) {
+                requests.push(
+                    axios.post(
+                        `${process.env.NEXT_PUBLIC_API_ENDPOINT_APIS}/${serviceApiId || id}`,
+                        apiData
+                    )
+                );
+            }
+    
+            // Update existing APIs
+            for (const apiData of existingApiData.filter(api => api.isModified)) {
+                requests.push(
+                    axios.patch(
+                        `${process.env.NEXT_PUBLIC_API_ENDPOINT_APIS}/${apiData.id}`,
+                        apiData
+                    )
+                );
+            }
+    
+            // Execute all requests
+            await Promise.all(requests);
+    
+            toast.success('Data saved successfully');
+            router.push(`/dashboard/service/service-api/view-serviceAPI?id=${id}`); // Refresh the page with the query params intact
+        } catch (error) {
+            console.error('Error saving data:', error);
+            toast.error('Failed to save data');
+        }
+    };
+
+    const handleOpenYamlEditor = () => {
+        setTempYamlSpec(yamlSpec);
+        setYamlEditorOpen(true);
+    };
+
+    const handleCloseYamlEditor = () => {
+        setYamlEditorOpen(false);
+    };
+
+    const handleYamlChange = (newYaml: string) => {
+        setTempYamlSpec(newYaml);
+    };
+
+    const handleSaveYaml = () => {
+        setYamlSpec(tempYamlSpec);
+        handleCloseYamlEditor();
+    };
+
+    if (loading || apiLoading) {
         return <div>Loading...</div>;
     }
 
-    if (!service) {
-        return <div>No service data found</div>;
-    }
-    // Akhir Fetching Data
-
     return (
-        <div className='flex overflow-y-auto'>
-            <div className="flex-1 space-y-4 p-4 md:p-8">
+        <div className="flex-1 px-4 md:p-8">
+            <div className="space-y-4">
                 <Breadcrumbs items={breadcrumbItems} />
                 <div className="flex items-start justify-between">
                     <Heading
-                        title="Update Service API"
-                        description="Update existing service API"
+                        title="Edit Service API"
+                        description="Edit new service API"
                     />
                 </div>
                 <hr className="border-neutral-200" />
-                <div className='text-sm'>
-                    <form>
-                    <div className='w-1/2'>
-                            <h3 className='font-medium mb-1'>Service Name</h3>
-                            <input 
-                                type="text" 
-                                name='service_name' 
-                                placeholder="Enter Service Name" 
-                                value={service.name}
-                                className={`emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid w-2/3`} 
-                            />
-                        </div>
-                        <div className='mt-3'>
-                            <h3 className='font-medium mb-1'>Description</h3>
-                            <textarea 
-                                name='description' 
-                                placeholder="Enter description" 
-                                value={service.description}
-                                className={`min-h-20 max-h-20 emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid w-1/2`} 
-                            ></textarea>
-                        </div>
-                        <div className='w-1/2 mt-3'>
-                            <h3 className='font-medium mb-1'>Gitlab url</h3>
-                            <input 
-                                type="text" 
-                                name='gitlabURL' 
-                                placeholder="Enter link" 
-                                value={service.gitlabUrl}
-                                className={`emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid w-2/3`} 
-                            />
-                        </div>
-                        <div className='w-1/2 mt-3'>
-                            <h3 className='font-medium mb-1'>Yaml Spec</h3>
-                            <textarea
-                                value={service.yamlSpec}
-                                name='yamlValue'
-                                placeholder="Your YAML code will appear here after saving"
-                                className="min-h-20 max-h-40 emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-2/3"
-                            />
-                        </div>
 
-                        <div className='mt-10'>
+                {id && initialData && (
+                    <div>
+                        <EditServiceForm 
+                            initialData={initialData} 
+                            onSubmit={handleUpdate} 
+                            yamlSpec={yamlSpec}
+                            onYamlSpecChange={handleOpenYamlEditor}
+                        />
+                    </div>
+                )}
+                <div>
+                    <div className='flex justify-start'>
+                        <div className='w-1/2'>
                             <h1 className='text-xl font-semibold mt-3'>
-                                Sonarqube
+                                APIs
                             </h1>
-                            <p className='pt-1 text-sm font-normal text-slate-500'>Sonarqube detail</p>
-                            <div className='flex justify-start mt-3'>
-                                <div className='w-1/3'>
-                                    <div>
-                                        <h3 className='font-medium mb-1'>Quality Gate Status</h3>
-                                        <input 
-                                            type="text" 
-                                            name='qualityGateStatus' 
-                                            placeholder="Enter Status" 
-                                            value={service.sonarqube.qualityGateStatus}
-                                            className={`placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid w-full`} 
-                                        />
-                                    </div>
-                                    <div className='mt-4'>
-                                        <h3 className='font-medium mb-1'>Vulnerabilities</h3>
-                                        <input 
-                                            type="text" 
-                                            name='vulnerabilities' 
-                                            placeholder="Enter Data" 
-                                            value={service.sonarqube.vulnerabilities}
-                                            className={`placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid w-full`} 
-                                        />
-                                    </div>
-                                    <div className='mt-4'>
-                                        <h3 className='font-medium mb-1'>Coverage</h3>
-                                        <input 
-                                            type="text" 
-                                            name='coverage' 
-                                            placeholder="Enter Data" 
-                                            value={service.sonarqube.coverage}
-                                            className={`placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid w-full`} 
-                                        />
-                                    </div>
-                                </div>
-                                <div className='w-1/3 ml-14'>
-                                    <div>
-                                        <h3 className='font-medium mb-1'>Bugs</h3>
-                                        <input 
-                                            type="text" 
-                                            name='bugs' 
-                                            placeholder="Enter Data" 
-                                            value={service.sonarqube.bugs}
-                                            className={`placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid w-full`} 
-                                        />
-                                    </div>
-                                    <div className='mt-4'>
-                                        <h3 className='font-medium mb-1'>Codesmell</h3>
-                                        <input 
-                                            type="text" 
-                                            name='codesmell' 
-                                            placeholder="Enter Data" 
-                                            value={service.sonarqube.codesmell}
-                                            className={`placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid w-full`} 
-                                        />
-                                    </div>
-                                    <div className='mt-4'>
-                                        <h3 className='font-medium mb-1'>Duplication</h3>
-                                        <input 
-                                            type="text" 
-                                            name='duplication' 
-                                            placeholder="Enter Data" 
-                                            value={service.sonarqube.duplication}
-                                            className={`placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid w-full`}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
+                            <p className='mt-1 text-gray-500 font-normal'>Add connected API</p>
                         </div>
-
-                        <div className='mt-7'>
-                            <h1 className='text-xl font-semibold mt-3'>
-                                Unit Testing
-                            </h1>
-                            <p className='pt-1 text-sm font-normal text-slate-500'>Unit testing detail</p>
-                            <div className='flex justify-start mt-3'>
-                                <div className='w-1/3'>
-                                    <div>
-                                        <h3 className='font-medium mb-1'>Coverage Statement</h3>
-                                        <input 
-                                            type="number" 
-                                            name='coverageStatement' 
-                                            placeholder="Enter Data" 
-                                            value={service.unit_testing.coverageStatement}
-                                            className={`placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid w-full`} 
-                                        />
-                                    </div>
-                                    <div className='mt-4'>
-                                        <h3 className='font-medium mb-1'>Coverage Function</h3>
-                                        <input 
-                                            type="number" 
-                                            name='coverageFunction' 
-                                            placeholder="Enter Data" 
-                                            value={service.unit_testing.coverageFunction}
-                                            className={`placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid w-full`} 
-                                        />
-                                    </div>
-                                    <div className='mt-4'>
-                                        <h3 className='font-medium mb-1'>Test Case Passed</h3>
-                                        <input 
-                                            type="number" 
-                                            name='testCasePassed' 
-                                            placeholder="Enter Data" 
-                                            value={service.unit_testing.testCasePassed}
-                                            className={`placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid w-full`} 
-                                        />
-                                    </div>
-                                </div>
-                                <div className='w-1/3 ml-14'>
-                                    <div>
-                                        <h3 className='font-medium mb-1'>Coverage Branch</h3>
-                                        <input 
-                                            type="number" 
-                                            name='coverageBranch' 
-                                            placeholder="Enter Data" 
-                                            value={service.unit_testing.CoverageBranch}
-                                            className={`placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid w-full`} 
-                                        />
-                                    </div>
-                                    <div className='mt-4'>
-                                        <h3 className='font-medium mb-1'>Coverage Lines</h3>
-                                        <input 
-                                            type="number" 
-                                            name='coverageLines' 
-                                            placeholder="Enter Data" 
-                                            value={service.unit_testing.CoverageLines}
-                                            className={`placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid w-full`} 
-                                        />
-                                    </div>
-                                    <div className='mt-4'>
-                                        <h3 className='font-medium mb-1'>Test Case Failed</h3>
-                                        <input 
-                                            type="number" 
-                                            name='testCaseFailed' 
-                                            placeholder="Enter Data" 
-                                            value={service.unit_testing.testCaseFailed}
-                                            className={`placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid w-full`} 
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className='mt-20 flex justify-between pr-16'>
-                            <p className='active:scale-95 min-w-16 form-flex justify-center items-center py-3 px-4 gap-2 cursor-pointer rounded-md shadow-sm text-red-600 bg-white border border-red-600 w-20 mt-3 mb-1 ml-3 font-semibold text-center' onClick={() => router.back()}>Cancel</p>
-                            <input type="submit" value="Save" className="active:scale-95 min-w-16 form-flex justify-center items-center border py-3 px-4 gap-2 cursor-pointer rounded-md shadow-sm text-white bg-red-600 w-20 mt-3 mb-1 ml-3 font-semibold"
+                        <div className='w-1/2 flex justify-end mt-2 mr-6'>
+                            <input 
+                                type="text"
+                                placeholder="Search Api"
+                                value={apiSearch}
+                                onChange={(e) => setApiSearch(e.target.value)}
+                                className="border px-4 py-2 rounded-lg h-10 mt-3 mr-4"
                             />
+                            <button onClick={() => handleOpenModal()} className="mt-3 justify-center items-center inline-flex w-20 h-10 bg-white border-2 text-black px-1 py-1 rounded-md font-semibold">
+                                <Plus className="mr-2 h-4 w-4" /> Add
+                            </button>
                         </div>
-                    </form>
+                    </div>
+                    <div className="mr-8">
+                        <DataTableComponent 
+                        data={existingApiData.concat(newApiData)} 
+                        onDetailClick={handleOpenModal} 
+                        />
+                    </div>
+                </div>
+                
+                <div className='mt-20 flex justify-between pr-16 text-sm'>
+                    <p className='active:scale-95 min-w-16 form-flex justify-center items-center py-3 px-4 gap-2 cursor-pointer rounded-md shadow-sm text-red-600 bg-white border border-red-600 w-20 mt-3 mb-1 ml-3 font-semibold text-center' onClick={() => router.back()}>Cancel</p>
+                    <button 
+                        type="submit" 
+                        className="active:scale-95 min-w-16 form-flex justify-center items-center border py-3 px-4 gap-2 cursor-pointer rounded-md shadow-sm text-white bg-red-600 w-20 mt-3 mb-1 ml-3 font-semibold"
+                        onClick={() => document.querySelector('form')?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))}
+                    >
+                        Save
+                    </button>
                 </div>
             </div>
+            <DetailModal 
+                isOpen={modalOpen} 
+                onClose={handleCloseModal} 
+                detailData={selectedApiDetails} 
+                onSave={handleSaveLocal} 
+                isCreating={isCreating} 
+            />
+
+            {yamlEditorOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-lg p-6 w-2/3 h-3/4">
+                        <h2 className="text-lg font-bold mb-4">Edit YAML Spec</h2>
+                        <MonacoEditor
+                            height="80%"
+                            language="yaml"
+                            value={tempYamlSpec}
+                            onChange={(value) => handleYamlChange(value || '')}
+                        />
+                        <div className="mt-4 flex justify-end space-x-4">
+                            <button 
+                                onClick={handleSaveYaml}
+                                className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                            >
+                                Save
+                            </button>
+                            <button 
+                                onClick={handleCloseYamlEditor}
+                                className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
-}
+};
 
-export default Page;
+export default ServiceAPIPage;

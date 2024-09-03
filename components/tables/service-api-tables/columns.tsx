@@ -23,11 +23,11 @@ export const getColumnsApi = (
       <div className="flex items-center justify-between">
         Service Name
         <button
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          onClick={() => column.toggleSorting()}
           className="ml-2 flex flex-row gap-0"
         >
-          <MoveUp className="w-4" />
-          <MoveDown className="w-4" />
+          <MoveUp className={`w-4 ${column.getIsSorted() === 'asc' ? 'text-black' : 'text-gray-400'}`} />
+          <MoveDown className={`w-4 ${column.getIsSorted() === 'desc' ? 'text-black' : 'text-gray-400'}`} />
         </button>
       </div>
     ),

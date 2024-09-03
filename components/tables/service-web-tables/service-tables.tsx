@@ -6,6 +6,7 @@ import {
   getCoreRowModel,
   getPaginationRowModel,
   useReactTable,
+  getSortedRowModel
 } from '@tanstack/react-table';
 import React from 'react';
 import {
@@ -75,18 +76,20 @@ export function ApiServiceTable<TData, TValue>({
     });
   }, [page, limit]);
 
-  const table = useReactTable({
-    data,
-    columns,
-    pageCount,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    manualPagination: true,
-    state: {
-      pagination: { pageIndex, pageSize },
-    },
-    onPaginationChange: setPagination,
-  });
+const table = useReactTable({
+  data,
+  columns,
+  pageCount,
+  getCoreRowModel: getCoreRowModel(),
+  getPaginationRowModel: getPaginationRowModel(),
+  getSortedRowModel: getSortedRowModel(),  // Tambahkan ini
+  manualPagination: true,
+  state: {
+    pagination: { pageIndex, pageSize },
+  },
+  onPaginationChange: setPagination,
+});
+
 
   return (
     <>

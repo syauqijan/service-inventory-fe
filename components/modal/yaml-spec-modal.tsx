@@ -24,8 +24,7 @@ const EditorPopup: React.FC<EditorPopupProps> = ({ isVisible, onClose, code, set
         <div
             className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50"
             onClick={handleBackgroundClick}>
-            <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-4xl relative z-60"
-                onClick={handleContentClick}>
+            <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-4xl relative z-60" onClick={handleContentClick}>
                 <button
                 onClick={onClose}
                 className="absolute top-2 right-4 text-gray-500 hover:text-gray-700 text-3xl">
@@ -38,7 +37,7 @@ const EditorPopup: React.FC<EditorPopupProps> = ({ isVisible, onClose, code, set
                     height="400px"
                     defaultLanguage="yaml"
                     defaultValue={code}
-                    theme="vs-dark"
+                    theme="hc-black"
                     onChange={(value) => setCode(value || '')}
                 />
                 <div className="mt-4 flex justify-end">

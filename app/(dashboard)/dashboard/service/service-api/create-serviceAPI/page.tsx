@@ -43,6 +43,14 @@ const Page = () => {
     const [version, setVersion] = useState('');
     const [customVersion, setCustomVersion] = useState(''); 
     const [platform, setPlatform] = useState('');
+    const userId = user?.userId;
+    // State untuk menyimpan status toggle
+    const [isActive, setIsActive] = useState(false); // Default: "inactive"
+
+    // Fungsi untuk menangani perubahan toggle
+    const handleToggleChange = () => {
+        setIsActive(!isActive); // Toggle state
+    };
 
     // State untuk menampung error
     const [errors, setErrors] = useState({
@@ -164,9 +172,9 @@ const Page = () => {
             }
 
             const sonarQubeResult = await sonarQubeResponse.json();
-            const sonarCubeId = sonarQubeResult.id;
+            const sonarQubeId = sonarQubeResult.id;
 
-            if (!sonarCubeId) {
+            if (!sonarQubeId) {
                 throw new Error('SonarQube ID is undefined');
             }
 
@@ -205,9 +213,12 @@ const Page = () => {
                 description: formData.get('description'),
                 gitlabUrl: formData.get('gitlabURL'),
                 versionService: formData.get('versionService'),
+                status: formData.get('status'),
                 yamlSpec: yamlValue,
-                sonarCubeId,
+                sonarQubeId,
                 unitTestingId,
+                ownerId: user?.userId,
+                createdBy: user?.userId,
             };
 
             const serviceApiResponse = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICEAPIS}`, {
@@ -335,6 +346,27 @@ const Page = () => {
                                 className={`emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid ${errors.versionService ? 'border-red-600' : 'border-neutral-300'} focus:outline-none w-2/3`} 
                             />
                             {errors.versionService && <p className="text-red-600 text-sm mt-1">{errors.versionService}</p>}
+                        </div>
+                        <div className='w-1/2 mt-3'>
+                            <h3 className='font-medium mb-1'>Status</h3>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input 
+                                    type="checkbox" 
+                                    checked={isActive} // Mengontrol checkbox dengan state
+                                    onChange={handleToggleChange} // Handle perubahan toggle
+                                    className="sr-only peer"
+                                />
+                                <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                <span className="ml-3 text-sm font-medium text-gray-900">
+                                    {isActive ? 'Active' : 'Inactive'}
+                                </span>
+                            </label>
+                            {/* Input hidden untuk mengirim nilai yang diinginkan */}
+                            <input 
+                                type="hidden" 
+                                name="status" 
+                                value={isActive ? "active" : "inactive"}
+                            />
                         </div>
                         <div className='mt-10'>
                             <h1 className='text-xl font-semibold mt-3'>
@@ -499,11 +531,12 @@ const Page = () => {
                             </div>
                             <table className="min-w-full bg-white border-gray-200 mt-2">
                                 <thead>
-                                    <tr>
-                                        <th className="py-2 px-4 border-b text-left">Method</th>
-                                        <th className="py-2 px-4 border-b text-left">Endpoint</th>
-                                        <th className="py-2 px-4 border-b text-center">Status</th>
-                                        <th className="py-2 px-4 border-b text-center">Actions</th>
+                                    <tr className='border-b'>
+                                        <th className="py-2 px-4 text-left">Method</th>
+                                        <th className="py-2 px-4 text-left">Endpoint</th>
+                                        <th className="py-2 px-4 text-center">Version</th>
+                                        <th className="py-2 px-4 text-center">Status</th>
+                                        <th className="py-2 px-4 text-center">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -515,25 +548,28 @@ const Page = () => {
                                         </tr>
                                     ) : (
                                         rows.map((row, index) => (
-                                            <tr key={index}>
-                                                <td className="py-2 px-4 border-b">{row.method.toUpperCase()}</td>
-                                                <td className="py-2 px-4 border-b"><p className='max-w-xl'>{row.endpoint}</p></td>
-                                                <td className={`flex justify-center py-2 px-4 border-b text-center ${row.status === 'active' ? 'text-green-600' : 'text-red-600'}`}>
-                                                <span className={`px-2 py-1 self-center rounded-full flex items-center justify-center w-20 border ${row.status === 'active' ? 'bg-green/200 border-green/600 text-green/600' : 'bg-red/200 border-red/600 text-red/600'}`}>
-                                                    {row.status}
-                                                </span>
+                                            <tr key={index} className='border-b'>
+                                                <td className="py-2 px-4">{row.method.toUpperCase()}</td>
+                                                <td className="py-2 px-4"><p className='max-w-xl'>{row.endpoint}</p></td>
+                                                <td className="py-2 px-4"><p className='max-w-xl text-center'>{row.version}</p></td>
+                                                <td className={`flex justify-center py-2 px-4 text-center ${row.status === 'active' ? 'text-green-600' : 'text-red-600'}`}>
+                                                    <span className={`px-2 py-1 self-center rounded-full flex items-center justify-center w-20 border ${row.status === 'active' ? 'bg-green/200 border-green/600 text-green/600' : 'bg-red/200 border-red/600 text-red/600'}`}>
+                                                        {row.status}
+                                                    </span>
                                                 </td>
-                                                <td className="py-2 px-4 border-b text-center">
-                                                    <h2 className="cursor-pointer"
-                                                        onClick={() => handleEditRow(index)}
-                                                    >
-                                                        Edit
-                                                    </h2>
-                                                    <h2 className="cursor-pointer text-red-600 mt-2"
-                                                        onClick={() => handleDeleteRow(index)}
-                                                    >
-                                                        Delete
-                                                    </h2>
+                                                <td className="py-2 px-4 text-center">
+                                                    <div className='flex justify-center'>
+                                                        <h2 className="cursor-pointer"
+                                                            onClick={() => handleEditRow(index)}
+                                                        >
+                                                            Edit
+                                                        </h2>
+                                                        <h2 className="cursor-pointer text-red-600 ml-4"
+                                                            onClick={() => handleDeleteRow(index)}
+                                                        >
+                                                            Delete
+                                                        </h2>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))

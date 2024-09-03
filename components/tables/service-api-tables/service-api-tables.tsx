@@ -1,13 +1,14 @@
 'use client';
+import React from 'react';
 import {
   ColumnDef,
   PaginationState,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
+  getSortedRowModel, // Import getSortedRowModel
   useReactTable,
 } from '@tanstack/react-table';
-import React from 'react';
 import {
   Select,
   SelectContent,
@@ -23,8 +24,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { DoubleArrowLeftIcon, DoubleArrowRightIcon } from '@radix-ui/react-icons';
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import {
+  DoubleArrowLeftIcon,
+  DoubleArrowRightIcon,
+} from '@radix-ui/react-icons';
+import { ChevronLeftIcon, ChevronRightIcon, MoveDown, MoveUp } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
@@ -66,7 +70,7 @@ export function ApiServiceTable<TData, TValue>({
         scroll: false,
       }
     );
-  }, [pageIndex, pageSize, router]);
+  }, [pageIndex, pageSize, router, pathname]);
 
   React.useEffect(() => {
     setPagination({
@@ -81,7 +85,9 @@ export function ApiServiceTable<TData, TValue>({
     pageCount,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(), // Use getSortedRowModel
     manualPagination: true,
+    manualSorting: false, // Set to false for client-side sorting
     state: {
       pagination: { pageIndex, pageSize },
     },
@@ -95,14 +101,14 @@ export function ApiServiceTable<TData, TValue>({
           <TableHeader className="text-slate-600 text-sm font-medium leading-normal sticky top-0 bg-white">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-              </TableRow>
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(header.column.columnDef.header, header.getContext())}
+                </TableHead>
+              ))}
+            </TableRow>
             ))}
           </TableHeader>
           <TableBody>
@@ -202,25 +208,6 @@ export function ApiServiceTable<TData, TValue>({
   );
 }
 
-export function WebServiceTable<TData, TValue>({
-  columns,
-  data,
-  searchKey,
-  pageNo,
-  totalItems,
-  pageSizeOptions = [10, 20, 30, 40, 50],
-  pageCount,
-}: DataTableProps<TData, TValue>) {
-  // Implement the same as ApiServiceTable with minor adjustments if needed
-  return (
-    <ApiServiceTable
-      columns={columns}
-      data={data}
-      searchKey={searchKey}
-      pageNo={pageNo}
-      totalItems={totalItems}
-      pageSizeOptions={pageSizeOptions}
-      pageCount={pageCount}
-    />
-  );
+export function WebServiceTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
+  return <ApiServiceTable {...props} />;
 }

@@ -23,18 +23,19 @@ interface Service {
     description: string;
     yamlSpec: string;
     serviceApiDetailId: string;
-    sonarCubeId: string;
+    sonarQubeId: string;
     unitTestingId: string;
     updatedAt: string;
     createdAt: string;
+    status: string;
     unit_testing: {
         id: string;
         testCasePassed: string;
         testCaseFailed: string;
         coverageStatement: number;
-        coverageBranch: string;
-        coverageFunction: string;
-        coverageLines: string;
+        coverageBranch: number; // Change from string to number for proper comparison
+        coverageFunction: number; // Change from string to number for proper comparison
+        coverageLines: number; // Change from string to number for proper comparison
     };
     sonarqube: {
         id: string;
@@ -49,10 +50,16 @@ interface Service {
         id: string;
         name: string;
     }
+    creator: {
+        name: string;
+    }
 }
 
 const Page = () => {
     const [progressColor, setProgressColor] = useState('');
+    const [branchColor, setBranchColor] = useState('');
+    const [functionColor, setFunctionColor] = useState('');
+    const [linesColor, setLinesColor] = useState('');
     const [versionArray, setVersionArray] = useState<string[]>([]);
 
     // Fetching Data
@@ -73,13 +80,42 @@ const Page = () => {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICEAPIS}/${serviceId}`);
             setService(response.data);
 
-            const cover = response.data.unit_testing.coverageStatement;
-            if (cover > 80) {
+            const { coverageStatement, coverageBranch, coverageFunction, coverageLines } = response.data.unit_testing;
+
+            // Set color for coverageStatement
+            if (coverageStatement > 80) {
                 setProgressColor('bg-green-500');
-            } else if (cover >= 70) {
+            } else if (coverageStatement >= 70) {
                 setProgressColor('bg-yellow-400');
             } else {
                 setProgressColor('bg-red-500');
+            }
+
+            // Set color for coverageBranch
+            if (coverageBranch > 80) {
+                setBranchColor('bg-green-500');
+            } else if (coverageBranch >= 70) {
+                setBranchColor('bg-yellow-400');
+            } else {
+                setBranchColor('bg-red-500');
+            }
+
+            // Set color for coverageFunction
+            if (coverageFunction > 80) {
+                setFunctionColor('bg-green-500');
+            } else if (coverageFunction >= 70) {
+                setFunctionColor('bg-yellow-400');
+            } else {
+                setFunctionColor('bg-red-500');
+            }
+
+            // Set color for coverageLines
+            if (coverageLines > 80) {
+                setLinesColor('bg-green-500');
+            } else if (coverageLines >= 70) {
+                setLinesColor('bg-yellow-400');
+            } else {
+                setLinesColor('bg-red-500');
             }
 
             const versionMain = response.data.versionService;
@@ -123,21 +159,21 @@ const Page = () => {
                     <div className='w-4/5 pt-2'>
                         <div>
                             <h3 className='font-medium'>Service Name</h3>
-                            <p className='font-normal mt-2'>{service.name}</p>
+                            <p className='font-normal mt-1'>{service.name}</p>
                         </div>
                         <div className='mt-6'>
                             <h3 className='font-medium'>Description</h3>
-                            <p className='font-normal mt-2'>{service.description}</p>
+                            <p className='font-normal mt-1'>{service.description}</p>
                         </div>
                         <div className='mt-6'>
-                            <h3 className='font-medium mb-2'>Gitlab URL</h3>
+                            <h3 className='font-medium mb-1'>Gitlab URL</h3>
                             <Link href={`${service.gitlabUrl}`} className='underline cursor-pointer font-normal flex w-fit text-blue-600'>
                                 {service.gitlabUrl}
                                 <ArrowUpRight fontSize="1.5em" />
                             </Link>
                         </div>
                         <div className='mt-6'>
-                            <h3 className='font-medium mb-2'>Swagger API</h3>
+                            <h3 className='font-medium mb-1'>Swagger API</h3>
                             <a onClick={(e) => {
                                 e.preventDefault();
                                 window.open(`/dashboard/service/service-api/swagger-page?id=${service.id}`, '_blank');
@@ -148,25 +184,33 @@ const Page = () => {
                                 <ArrowUpRight fontSize="1.5em" />
                             </a>
                         </div>
+                        <div className='mt-4'>
+                            <h3 className='font-medium'>Status</h3>
+                            <p className='font-normal mt-1'>{service.status}</p>
+                        </div>
                     </div>
                     <div className='w-1/5 pt-2'>
-                        <div className='mt-4'>
-                            <h3 className='font-medium'>Updated at</h3>
-                            <p className='font-normal mt-2'>{new Date(service.updatedAt).toLocaleString()}</p>
+                        <div>
+                            <h3 className='font-medium'>Created at</h3>
+                            <p className='font-normal mt-1'>{new Date(service.createdAt).toLocaleString()}</p>
                         </div>
                         <div className='mt-4'>
-                            <h3 className='font-medium'>Created at</h3>
-                            <p className='font-normal mt-2'>{new Date(service.createdAt).toLocaleString()}</p>
+                            <h3 className='font-medium'>Updated at</h3>
+                            <p className='font-normal mt-1'>{new Date(service.updatedAt).toLocaleString()}</p>
+                        </div>
+                        <div className='mt-4'>
+                            <h3 className='font-medium'>Updated by</h3>
+                            <p className='font-normal mt-1'>{service.user.name}</p>
                         </div>
                         <div className='mt-4'>
                             <h3 className='font-medium'>Created by</h3>
-                            <p className='font-normal mt-2'>{service.user.name}</p>
+                            <p className='font-normal mt-1'>{service.creator.name}</p>
                         </div>
                         <div className='mt-4'>
                             <h3 className='font-medium'>Version</h3>
                             <div className="flex flex-wrap">
                                 {versionArray.map((version, index) => (
-                                    <p key={index} className='font-normal mt-2 flex-1 min-w-[50%]'>{version}</p>
+                                    <p key={index} className='font-normal mt-1 flex-1 min-w-[50%]'>{version}</p>
                                 ))}
                             </div>
                         </div>
@@ -212,28 +256,31 @@ const Page = () => {
                         <div className='grid grid-cols-3 gap-2 content-center mt-3'>
                             <div className='border mx-2 mb-3 px-3 pt-3 pb-1 rounded-md shadow'>
                                 <h1 className='text-center'>Coverage Statement</h1>
-                                <p className='text-center text-2xl mt-2 font-semibold'>{service.unit_testing.coverageStatement}%</p>
+                                <p className='text-center text-2xl font-semibold'>{service.unit_testing.coverageStatement}%</p>
                                 <div className={`h-2.5 rounded-full w-full ${progressColor}`}></div>
                             </div>
                             <div className='border mx-2 mb-3 p-3 rounded-md shadow'>
                                 <h1 className='text-center'>Coverage Branch</h1>
-                                <p className='text-center text-2xl mt-3 font-semibold'>{service.unit_testing.coverageBranch}%</p>
+                                <p className='text-center text-2xl font-semibold'>{service.unit_testing.coverageBranch}%</p>
+                                <div className={`h-2.5 rounded-full w-full ${branchColor}`}></div>
                             </div>
                             <div className='border mx-2 mb-3 p-3 rounded-md shadow'>
                                 <h1 className='text-center'>Coverage Lines</h1>
-                                <p className='text-center text-2xl mt-3 font-semibold'>{service.unit_testing.coverageLines}%</p>
+                                <p className='text-center text-2xl font-semibold'>{service.unit_testing.coverageLines}%</p>
+                                <div className={`h-2.5 rounded-full w-full ${linesColor}`}></div>
                             </div>
                             <div className='border mx-2 p-3 rounded-md shadow'>
                                 <h1 className='text-center'>Coverage Function</h1>
-                                <p className='text-center text-2xl mt-3 font-semibold'>{service.unit_testing.coverageFunction}%</p>
+                                <p className='text-center text-2xl font-semibold'>{service.unit_testing.coverageFunction}%</p>
+                                <div className={`h-2.5 rounded-full w-full ${functionColor}`}></div>
                             </div>
                             <div className='border mx-2 p-3 rounded-md shadow'>
                                 <h1 className='text-center'>Test Case Success</h1>
-                                <p className='text-center text-2xl mt-3 font-semibold'>{service.unit_testing.testCasePassed}%</p>
+                                <p className='text-center text-2xl mt-3 font-semibold'>{service.unit_testing.testCasePassed}</p>
                             </div>
                             <div className='border mx-2 p-3 rounded-md shadow'>
                                 <h1 className='text-center'>Test Case Failed</h1>
-                                <p className='text-center text-2xl mt-3 font-semibold'>{service.unit_testing.testCaseFailed}%</p>
+                                <p className='text-center text-2xl mt-3 font-semibold'>{service.unit_testing.testCaseFailed}</p>
                             </div>
                         </div>
                     </div>

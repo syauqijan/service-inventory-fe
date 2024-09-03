@@ -12,7 +12,6 @@ const copyToClipboard = (text: string) => {
   toast.success('Copied to clipboard');
 };
 
-
 export const getColumns = (
   handleDeleteService: (service: Service) => void,
   handleUpdateService: (service: Service) => void,
@@ -23,14 +22,15 @@ export const getColumns = (
       <div className="flex items-center justify-between">
         Service Name
         <button
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          onClick={() => column.toggleSorting()}
           className="ml-2 flex flex-row gap-0"
         >
-          <MoveUp className="w-4" />
-          <MoveDown className="w-4" />
+          <MoveUp className={`w-4 ${column.getIsSorted() === 'asc' ? 'text-black' : 'text-gray-400'}`} />
+          <MoveDown className={`w-4 ${column.getIsSorted() === 'desc' ? 'text-black' : 'text-gray-400'}`} />
         </button>
       </div>
     ),
+    enableSorting: true, // Pastikan sorting diaktifkan
     cell: ({ row }) => (
       <Link href={`/dashboard/service/service-web/view-service?id=${row.original.id}`} passHref>
           {row.original.name}
@@ -40,6 +40,7 @@ export const getColumns = (
   {
     accessorKey: 'gitlabUrl',
     header: 'Gitlab URL',
+    enableSorting: false, // Disable sorting jika tidak diperlukan
     cell: ({ row }) => (
       <div className='flex justify-between w-[500px]'>
         <a href={row.original.gitlabUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
@@ -54,6 +55,7 @@ export const getColumns = (
   {
     id: 'actions',
     header: 'Actions',
+    enableSorting: false, // Disable sorting jika tidak diperlukan
     cell: ({ row }) => (
       <div className='flex flex-row gap-4'>
         <Edit

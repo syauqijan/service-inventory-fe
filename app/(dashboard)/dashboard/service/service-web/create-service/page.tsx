@@ -31,6 +31,7 @@ const Page = () => {
     const router = useRouter();
     const [isChecked, setIsChecked] = useState(false)
     const [isChecked2, setIsChecked2] = useState(false)
+    const [isCheckedService, setIsCheckedService] = useState(false)
     const userId = user?.userId;
     const [gitlabUrl, setGitlabUrl] = useState<string>('');
     const [name, setName] = useState<string>('');
@@ -38,6 +39,7 @@ const Page = () => {
     const [versionService, setversionService] = useState<string>('');
     const [preprodUrl, setPreprodUrl] = useState<string>('');
     const [preprodUrlStatus, setPreprodUrlStatus] = useState<string>('inactive');
+    const [status, setStatus] = useState<string>('inactive');
     const [prodUrl, setProdUrl] = useState<string>('');
     const [prodUrlStatus, setProdUrlStatus] = useState<string>('inactive');
     const [errors, setErrors] = useState<ValidationErrors>({});
@@ -87,7 +89,9 @@ const Page = () => {
                 preprodUrlStatus,
                 prodUrl,
                 prodUrlStatus,
-                versionService
+                versionService,
+                status,
+                createdBy: userId,
             });
             if(response.status===201){
                 router.push('/dashboard/service');
@@ -125,6 +129,13 @@ const Page = () => {
         });
     }
     
+    const handleStatus = () => {
+        setIsCheckedService(prevState => {
+            const newState = !prevState;
+            setStatus(newState ? 'active' : 'inactive');
+            return newState;
+        });
+    }
 
     return (
         <div className='flex overflow-y-auto '>
@@ -163,6 +174,27 @@ const Page = () => {
                                 placeholder="Enter link" className="placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5"  />
                             {errors.gitlabUrl && <p className="text-red-500 text-sm font-normal pt-1 pl-1">{errors.gitlabUrl}</p>}
                         </div>
+
+
+                        <div className='w-2/5 mt-3'>
+                            <h3 className='font-medium mb-1'>Status</h3>
+                            <label className='autoSaverSwitch relative inline-flex cursor-pointer select-none items-center'>
+                                <input type='checkbox' name='autoSaver' className='sr-only' checked={isCheckedService} onChange={handleStatus} />
+                                <span className={`slider mr-3 flex h-[26px] w-[50px] items-center rounded-full p-1 duration-200 ${isCheckedService ? 'bg-slate/900' : 'bg-[#CCCCCE]'}`}>
+                                    <span
+                                        className={`dot h-[18px] w-[18px] rounded-full bg-white duration-200 ${isCheckedService ? 'translate-x-6' : ''}`}>
+                                    </span>
+                                </span>
+                                <span className='label flex items-center text-sm font-medium text-black'>
+                                    <span className='pl-1'>
+                                        <input type='text' id='status' value={isCheckedService ? 'Active' : 'Inactive'} onChange={(e) => setStatus(e.target.value)}>
+                                        </input>
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+
+                        
                         <div className='mt-3 flex justify-center w-1/2'>
                             <div className='w-4/5'>
                                 <h3 className='font-medium mb-1'>Pre-Prod URL</h3>

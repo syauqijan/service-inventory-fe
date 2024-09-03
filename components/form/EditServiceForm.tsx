@@ -1,5 +1,4 @@
-'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface FormState {
     versionService: string;
@@ -10,17 +9,18 @@ interface FormState {
     description: string;
     yamlSpec: string;
     serviceApiDetailId: string;
-    sonarCubeId: string;
+    sonarQubeId: string;
     unitTestingId: string;
     updatedAt: string;
     createdAt: string;
+    status: string;
     unit_testing: {
         id: string;
-        testCasePassed: string;
-        testCaseFailed: string;
+        testCasePassed: number;
+        testCaseFailed: number;
         coverageStatement: number;
         coverageBranch: number;
-        coverageFunction: string;
+        coverageFunction: number;
         coverageLines: number;
     };
     sonarqube: {
@@ -29,7 +29,7 @@ interface FormState {
         bugs: string;
         vulnerabilities: string;
         codesmell: string;
-        coverage: string;
+        coverage: string;  // Pastikan ini adalah string
         duplication: string;
     }
     user: {
@@ -42,7 +42,7 @@ interface EditServiceFormProps {
     initialData: FormState;
     onSubmit: (formState: FormState) => Promise<void>;
     yamlSpec: string;
-    onYamlSpecChange: () => void; // Function to open YAML editor
+    onYamlSpecChange: () => void;
 }
 
 const EditServiceForm: React.FC<EditServiceFormProps> = ({ initialData, onSubmit, yamlSpec, onYamlSpecChange }) => {
@@ -64,12 +64,19 @@ const EditServiceForm: React.FC<EditServiceFormProps> = ({ initialData, onSubmit
                 ...prevState,
                 [firstKey]: {
                     ...(prevState[firstKey] as object),
-                    [keys[1]]: keys[1].includes('coverage') || keys[1].includes('testCase')
+                    [keys[1]]: keys[1].includes('testCase') || keys[1].includes('coverage') && keys[1] !== 'coverage' // Only convert if it's a numeric field, and not `sonarqube.coverage`
                         ? Number(value)
-                        : value,
+                        : value, // Keep the string as is
                 },
             }));
         }
+    };
+
+    const handleToggleChange = () => {
+        setFormState((prevState) => ({
+            ...prevState,
+            status: prevState.status === 'active' ? 'inactive' : 'active'
+        }));
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -79,7 +86,7 @@ const EditServiceForm: React.FC<EditServiceFormProps> = ({ initialData, onSubmit
             yamlSpec, // Include the yamlSpec when submitting
         });
     };
-
+    
     return (
         <form onSubmit={handleSubmit} className='text-sm mb-7'>
             <div className='w-1/2'>
@@ -136,6 +143,25 @@ const EditServiceForm: React.FC<EditServiceFormProps> = ({ initialData, onSubmit
                     className='emailcustom placeholder:opacity-50 mt-1 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-2/3'
                 />
             </div>
+
+            {/* Toggle Switch */}
+            <div className='w-1/2 mt-3'>
+                <h3 className='font-medium mb-1'>Service Status</h3>
+                <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                        type="checkbox" 
+                        name="status"
+                        checked={formState.status === 'active'}
+                        onChange={handleToggleChange}
+                        className="sr-only peer"
+                    />
+                    <div className="w-12 h-7 bg-gray-200 rounded-full peer peer-focus:ring-gray-300 dark:peer-focus:ring-gray-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-600"></div>
+                    <span className="ml-3 text-sm font-medium text-gray-900">
+                        {formState.status === 'active' ? 'Active' : 'Inactive'}
+                    </span>
+                </label>
+            </div>
+
             <hr />
             <div className='mt-10'>
                 <h1 className='text-xl font-semibold mt-3'>SonarQube</h1>
@@ -187,7 +213,7 @@ const EditServiceForm: React.FC<EditServiceFormProps> = ({ initialData, onSubmit
                         <div className='mt-4'>
                             <label className='font-medium'>Coverage</label><br />
                             <input
-                                type="text"
+                                type="text"  // Type is text to allow any input
                                 name="sonarqube.coverage"
                                 value={formState.sonarqube.coverage}
                                 onChange={handleChange}

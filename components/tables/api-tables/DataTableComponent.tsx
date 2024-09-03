@@ -9,7 +9,7 @@ import { Trash } from 'lucide-react';
 const DataTable = dynamic(() => import('react-data-table-component'), {
     ssr: false,
     loading: () => <p>Loading DataTable...</p>
-});
+}) as React.ComponentType<{ columns: TableColumn<DataRow>[]; data: DataRow[]; pagination: boolean; highlightOnHover: boolean; responsive: boolean; paginationPerPage: number; paginationRowsPerPageOptions: number[]; customStyles: object; className: string; }>;
 
 interface DataTableComponentProps {
     data: DataRow[];
@@ -36,28 +36,21 @@ const DataTableComponent: React.FC<DataTableComponentProps> = ({ data, onDeleteC
             name: 'Endpoint', 
             selector: (row) => row.endpoint || 'N/A', 
             sortable: true,
-            minWidth: '300px',
+            minWidth: '370px',
             cell: row => <div className="text-gray-800">{row.endpoint || 'N/A'}</div>,
         },
-        // { 
-        //     name: 'Description', 
-        //     selector: (row) => row.description || 'N/A', 
-        //     sortable: true,
-        //     minWidth: '350px',
-        //     cell: row => <div className="text-gray-800">{row.description || 'N/A'}</div>,
-        // },
         { 
             name: 'Version', 
             selector: (row) => row.version || 'N/A', 
             sortable: true,
-            minWidth: '150px',
+            minWidth: '130px',
             cell: row => <div className="text-gray-800 text-center">{row.version || 'N/A'}</div>,
         },
         { 
             name: 'Platform', 
             selector: (row) => row.platform || 'N/A', 
             sortable: true,
-            minWidth: '150px',
+            minWidth: '100px',
             cell: row => <div className="text-gray-800 text-center">{row.platform || 'N/A'}</div>,
         },
         { 
@@ -85,7 +78,7 @@ const DataTableComponent: React.FC<DataTableComponentProps> = ({ data, onDeleteC
     ];
 
     return (
-        <div className=" rounded-md">
+        <div className="rounded-md">
             <DataTable
                 columns={columns}
                 data={data}
@@ -93,14 +86,13 @@ const DataTableComponent: React.FC<DataTableComponentProps> = ({ data, onDeleteC
                 highlightOnHover
                 responsive
                 paginationPerPage={10}
-                paginationRowsPerPageOptions={[10, 20, 30]}
+                paginationRowsPerPageOptions={[10, 20, 30, 40, 50]}
                 customStyles={{
                     headCells: {
                         style: {
-                            fontSize: '14px',
+                            fontSize: '15px',
                             fontWeight: '500',
                             textAlign: 'center',    
-                            paddingLeft: '20px',
                             height: '40px',
                             borderBottom: '1px solid #d1d1d1',
                             margin: '0px'
@@ -116,8 +108,8 @@ const DataTableComponent: React.FC<DataTableComponentProps> = ({ data, onDeleteC
                         style: {
                             fontSize: '14px',
                             fontWeight: '400',
-                            paddingLeft: '3px',
-                            minHeight: '45px',
+                            paddingTop: '4px',
+                            paddingBottom: '4px'
                         },
                     },
                     pagination: {

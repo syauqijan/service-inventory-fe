@@ -18,7 +18,7 @@ interface Service {
   description: string;
   yamlSpec: string;
   serviceApiDetailId: string;
-  sonarCubeId: string;
+  sonarQubeId: string;
   unitTestingId: string;
   updatedAt: string;
   createdAt: string;

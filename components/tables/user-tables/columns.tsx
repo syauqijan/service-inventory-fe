@@ -12,14 +12,15 @@ export const getColumns = (
       <div className="flex items-center justify-between">
         Name
         <button
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          className="ml-2 flex flex-row gap-0"
+          onClick={() => column.toggleSorting()}
+          className="ml-2 flex items-center gap-1"
         >
-          <MoveUp className="w-4" />
-          <MoveDown className="w-4" />
+          <MoveUp className={`w-4 ${column.getIsSorted() === 'asc' ? 'text-black' : 'text-gray-400'}`} />
+          <MoveDown className={`w-4 ${column.getIsSorted() === 'desc' ? 'text-black' : 'text-gray-400'}`} />
         </button>
       </div>
     ),
+    enableSorting: true,  // Pastikan sorting diaktifkan
   },
   {
     accessorKey: 'email',
@@ -28,6 +29,7 @@ export const getColumns = (
         Email
       </div>
     ),
+    enableSorting: true,  // Pastikan sorting diaktifkan jika diperlukan
   },
   {
     accessorKey: 'role.name',
@@ -35,14 +37,15 @@ export const getColumns = (
       <div className="flex items-center justify-between">
         Role
         <button
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          className="ml-2 flex flex-row gap-0"
+          onClick={() => column.toggleSorting()}
+          className="ml-2 flex items-center gap-1"
         >
-          <MoveUp className="w-4" />
-          <MoveDown className="w-4" />
+          <MoveUp className={`w-4 ${column.getIsSorted() === 'asc' ? 'text-black' : 'text-gray-400'}`} />
+          <MoveDown className={`w-4 ${column.getIsSorted() === 'desc' ? 'text-black' : 'text-gray-400'}`} />
         </button>
       </div>
     ),
+    enableSorting: true,  // Pastikan sorting diaktifkan
   },
   {
     accessorKey: 'actions',

@@ -1,10 +1,12 @@
 'use client';
+
 import {
   ColumnDef,
   PaginationState,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
+  getSortedRowModel, // Pastikan ini diimpor
   useReactTable,
 } from '@tanstack/react-table';
 import React from 'react';
@@ -48,6 +50,7 @@ export function UserTable<TData, TValue>({
     pageCount,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(), // Tambahkan ini untuk mengaktifkan sorting
     manualPagination: true,
     onPaginationChange: setPagination,
     state: {

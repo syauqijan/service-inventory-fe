@@ -12,6 +12,7 @@ import { ApiDetails } from './types';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
+import useAuth from "@/hooks/useAuth";
 
 interface ServiceAPIPageProps {
     params: {
@@ -28,6 +29,7 @@ const breadcrumbItems = [
 const generateTempId = () => `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 const ServiceAPIPage: React.FC<ServiceAPIPageProps> = ({ params }) => {
+    const { user } = useAuth();
     const { serviceApiId } = params;
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -36,7 +38,6 @@ const ServiceAPIPage: React.FC<ServiceAPIPageProps> = ({ params }) => {
     const [existingApiData, setExistingApiData] = useState<ApiDetails[]>([]);
     const [newApiData, setNewApiData] = useState<ApiDetails[]>([]);
     const [apiLoading, setApiLoading] = useState(true);
-    const [apiSearch, setApiSearch] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedApiDetails, setSelectedApiDetails] = useState<ApiDetails | null>(null);
     const [isCreating, setIsCreating] = useState(false);
@@ -46,6 +47,8 @@ const ServiceAPIPage: React.FC<ServiceAPIPageProps> = ({ params }) => {
     const [yamlSpec, setYamlSpec] = useState(''); 
     const [tempYamlSpec, setTempYamlSpec] = useState(''); 
     const [yamlEditorOpen, setYamlEditorOpen] = useState(false); 
+
+    const userId = user?.userId;
 
     useEffect(() => {
         if (id) {
@@ -147,7 +150,9 @@ const ServiceAPIPage: React.FC<ServiceAPIPageProps> = ({ params }) => {
                         description: updatedData.description,
                         gitlabUrl: updatedData.gitlabUrl,
                         versionService: updatedData.versionService,
+                        status: updatedData.status,
                         yamlSpec: yamlSpec,
+                        ownerId: userId,
                     }
                 )
             );
@@ -195,7 +200,7 @@ const ServiceAPIPage: React.FC<ServiceAPIPageProps> = ({ params }) => {
             // Execute all requests
             await Promise.all(requests);
     
-            toast.success('Data saved successfully');
+            toast.success('Service API Updated');
             router.push(`/dashboard/service/service-api/view-serviceAPI?id=${id}`); // Refresh the page with the query params intact
         } catch (error) {
             console.error('Error saving data:', error);
@@ -256,13 +261,6 @@ const ServiceAPIPage: React.FC<ServiceAPIPageProps> = ({ params }) => {
                             <p className='mt-1 text-gray-500 font-normal'>Add connected API</p>
                         </div>
                         <div className='w-1/2 flex justify-end mt-2 mr-6'>
-                            <input 
-                                type="text"
-                                placeholder="Search Api"
-                                value={apiSearch}
-                                onChange={(e) => setApiSearch(e.target.value)}
-                                className="border px-4 py-2 rounded-lg h-10 mt-3 mr-4"
-                            />
                             <button onClick={() => handleOpenModal()} className="mt-3 justify-center items-center inline-flex w-20 h-10 bg-white border-2 text-black px-1 py-1 rounded-md font-semibold">
                                 <Plus className="mr-2 h-4 w-4" /> Add
                             </button>
@@ -296,27 +294,28 @@ const ServiceAPIPage: React.FC<ServiceAPIPageProps> = ({ params }) => {
             />
 
             {yamlEditorOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg shadow-lg p-6 w-2/3 h-3/4">
-                        <h2 className="text-lg font-bold mb-4">Edit YAML Spec</h2>
+                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-4xl relative z-60">
+                        <button
+                            onClick={handleCloseYamlEditor}
+                            className="absolute top-2 right-4 text-gray-500 hover:text-gray-700 text-3xl">
+                                &times;
+                        </button>
+                        <h2 className="text-lg font-bold mb-1">Edit YAML</h2>
+                        <p className='text-sm mb-4'>Edit YAML Details</p>
                         <MonacoEditor
-                            height="80%"
-                            language="yaml"
+                            height="400px"
+                            defaultLanguage="yaml"
                             value={tempYamlSpec}
+                            theme="hc-black"
                             onChange={(value) => handleYamlChange(value || '')}
                         />
                         <div className="mt-4 flex justify-end space-x-4">
                             <button 
                                 onClick={handleSaveYaml}
-                                className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                                className="px-4 py-2 bg-red-600 text-white rounded-md"
                             >
                                 Save
-                            </button>
-                            <button 
-                                onClick={handleCloseYamlEditor}
-                                className="bg-red-500 text-white px-4 py-2 rounded-lg"
-                            >
-                                Close
                             </button>
                         </div>
                     </div>

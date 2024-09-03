@@ -123,7 +123,7 @@ const AddRowPopup: React.FC<AddRowPopupProps> = ({
                                     Select platform
                                 </option>
                                 <option value="Web">Web</option>
-                                <option value="Android">Android</option>
+                                <option value="Apps">Apps</option>
                                 {/* Add more platforms as needed */}
                             </select>
                         </div>
@@ -152,7 +152,7 @@ const AddRowPopup: React.FC<AddRowPopupProps> = ({
                     <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-md mt-1 min-h-20"
+                        className="w-full p-2 border border-gray-300 rounded-md mt-1 min-h-20 max-h-40"
                         placeholder="Type your message here"
                     />
                 </div>

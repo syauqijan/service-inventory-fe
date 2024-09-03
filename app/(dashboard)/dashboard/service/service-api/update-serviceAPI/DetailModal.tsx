@@ -5,7 +5,7 @@ interface DetailModalProps {
     isOpen: boolean;
     onClose: () => void;
     detailData: ApiDetails | null;
-    onSave:(updatedData: ApiDetails, isNew: boolean) => void;
+    onSave: (updatedData: ApiDetails, isNew: boolean) => void;
     isCreating: boolean;
 }
 
@@ -18,6 +18,8 @@ const DetailModal: React.FC<DetailModalProps> = ({ isOpen, onClose, detailData, 
     const [status, setStatus] = useState(false);
     const [description, setDescription] = useState('');
     const [id, setID] = useState('');
+
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
     useEffect(() => {
         if (detailData) {
@@ -40,7 +42,23 @@ const DetailModal: React.FC<DetailModalProps> = ({ isOpen, onClose, detailData, 
         }
     }, [detailData]);
 
+    const validateForm = () => {
+        const newErrors: { [key: string]: string } = {};
+
+        if (!endpoint) newErrors.endpoint = 'Endpoint is required';
+        if (!method) newErrors.method = 'Method is required';
+        if (!description) newErrors.description = 'Description is required';
+
+        setErrors(newErrors);
+
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSave = () => {
+        if (!validateForm()) {
+            return;
+        }
+
         const updatedData: ApiDetails = {
             id: id,
             endpoint,
@@ -80,16 +98,17 @@ const DetailModal: React.FC<DetailModalProps> = ({ isOpen, onClose, detailData, 
                                 type="text"
                                 value={endpoint}
                                 onChange={(e) => setEndpoint(e.target.value)}
-                                className="w-full p-2 border border-gray-300 rounded-md mt-1"
+                                className={`w-full p-2 border ${errors.endpoint ? 'border-red-500' : 'border-gray-300'} rounded-md mt-1`}
                                 placeholder="Enter endpoint"
                             />
+                            {errors.endpoint && <p className="text-red-500 text-sm">{errors.endpoint}</p>}
                         </div>
                         <div className="mt-3">
                             <label className="block text-sm font-medium mb-1">Version</label>
                             <select
                                 value={version}
                                 onChange={(e) => setVersion(e.target.value)}
-                                className="w-full p-2 border border-gray-300 rounded-md mt-1"
+                                className={`w-full p-2 border ${errors.version ? 'border-red-500' : 'border-gray-300'} rounded-md mt-1`}
                             >
                                 <option value="" disabled>
                                     Enter or select version
@@ -104,10 +123,12 @@ const DetailModal: React.FC<DetailModalProps> = ({ isOpen, onClose, detailData, 
                                     type="text"
                                     value={customVersion}
                                     onChange={(e) => setCustomVersion(e.target.value)}
-                                    className="w-full p-2 border border-gray-300 rounded-md mt-2"
+                                    className={`w-full p-2 border ${errors.customVersion ? 'border-red-500' : 'border-gray-300'} rounded-md mt-2`}
                                     placeholder="Enter custom version"
                                 />
                             )}
+                            {errors.version && <p className="text-red-500 text-sm">{errors.version}</p>}
+                            {errors.customVersion && <p className="text-red-500 text-sm">{errors.customVersion}</p>}
                         </div>
                     </div>
                     <div className="w-2/5 ml-4">
@@ -117,23 +138,25 @@ const DetailModal: React.FC<DetailModalProps> = ({ isOpen, onClose, detailData, 
                                 type="text"
                                 value={method}
                                 onChange={(e) => setMethod(e.target.value)}
-                                className="w-full p-2 border border-gray-300 rounded-md mt-1"
+                                className={`w-full p-2 border ${errors.method ? 'border-red-500' : 'border-gray-300'} rounded-md mt-1`}
                                 placeholder="Enter method"
                             />
+                            {errors.method && <p className="text-red-500 text-sm">{errors.method}</p>}
                         </div>
                         <div className="mt-3">
                             <label className="block text-sm font-medium mb-1">Platform</label>
                             <select
                                 value={platform}
                                 onChange={(e) => setPlatform(e.target.value)}
-                                className="w-full p-2 border border-gray-300 rounded-md mt-1"
+                                className={`w-full p-2 border ${errors.platform ? 'border-red-500' : 'border-gray-300'} rounded-md mt-1`}
                             >
                                 <option value="" disabled>
                                     Select platform
                                 </option>
                                 <option value="Web">Web</option>
-                                <option value="Android">Android</option>
+                                <option value="Apps">Apps</option>
                             </select>
+                            {errors.platform && <p className="text-red-500 text-sm">{errors.platform}</p>}
                         </div>
                     </div>
                     <div className="w-1/5 ml-12">
@@ -160,9 +183,10 @@ const DetailModal: React.FC<DetailModalProps> = ({ isOpen, onClose, detailData, 
                     <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-md mt-1 min-h-20"
+                        className={`w-full p-2 border ${errors.description ? 'border-red-500' : 'border-gray-300'} rounded-md mt-1 min-h-20 max-h-40`}
                         placeholder="Type your message here"
                     />
+                    {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
                 </div>
                 <div className="flex justify-end mt-8">
                     <button onClick={handleSave} className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">

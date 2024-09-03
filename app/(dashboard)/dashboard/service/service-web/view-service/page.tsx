@@ -24,9 +24,14 @@ interface Service {
     updatedAt: string;
     version: string;
     userId: string;
+    status: string;
+    createdBy: string;
     user: {
         name: string;
     };
+    creator: {
+        name: string;
+    }
 }
 
 
@@ -100,14 +105,14 @@ const Page = () => {
                     <div className='w-4/5 pt-2 pr-80'>
                         <div>
                             <h3 className='font-medium'>Service Name</h3>
-                            <p className='font-normal'>{service.name}</p>
+                            <p className='font-normal mt-1'>{service.name}</p>
                         </div>
                         <div className='mt-6'>
                             <h3 className='font-medium'>Description</h3>
-                            <p className='font-normal mt-2'>{service.description}</p>
+                            <p className='font-normal mt-1'>{service.description}</p>
                         </div>
                         <div className='mt-6'>
-                            <h3 className='font-medium mb-2'>Gitlab URL</h3>
+                            <h3 className='font-medium mb-1'>Gitlab URL</h3>
                             <a className='font-normal flex items-center text-blue-600' href={service.gitlabUrl}>
                                 <p className='underline mr-1'>
                                     {service.gitlabUrl}
@@ -115,11 +120,15 @@ const Page = () => {
                                 <ArrowUpRight fontSize="1.5em" />
                             </a>
                         </div>
+                        <div className='mt-3'>
+                            <h3 className='font-medium'>Status</h3>
+                            <p className='font-normal mt-1'>{service.status}</p>
+                        </div>
                     </div>
                     <div className='w-1/5 pt-2'>
                         <div>
                             <h3 className='font-medium'>Created At</h3>
-                            <p className='font-normal'>{new Date(service.createdAt).toLocaleString()}</p>
+                            <p className='font-normal mt-1'>{new Date(service.createdAt).toLocaleString()}</p>
                         </div>
                         <div className='mt-4'>
                             <h3 className='font-medium'>Updated at</h3>
@@ -128,6 +137,10 @@ const Page = () => {
                         <div className='mt-4'>
                             <h3 className='font-medium'>Updated by</h3>
                             <p className='font-normal mt-1'>{service.user.name}</p>
+                        </div>
+                        <div className='mt-4'>
+                            <h3 className='font-medium'>Created by</h3>
+                            <p className='font-normal mt-1'>{service.creator.name}</p>
                         </div>
                         <div className='mt-4'>
                             <h3 className='font-medium'>Version</h3>
@@ -141,10 +154,10 @@ const Page = () => {
                 </div>
 
                 <div>
-                    <h1 className='text-2xl font-semibold mt-16'>URLs</h1>
+                    <h1 className='text-2xl font-semibold mt-14'>URLs</h1>
                     <p className='pt-2 text-sm font-normal text-slate-500'>URL related to this service</p>
                 </div>
-                <div className='w-full h-[112px] flex justify-center text-sm'>
+                <div className='w-full h-[150px] flex justify-center text-sm'>
                     <ServiceDetailTable
                         columns={columns}
                         data={data}

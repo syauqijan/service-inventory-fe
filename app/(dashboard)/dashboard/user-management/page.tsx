@@ -21,6 +21,7 @@ export interface User {
   email: string;
   password: string; 
   roleId: number; 
+  status: string;
   role: {
     name: string;
   } | null;
@@ -119,10 +120,12 @@ const Page = () => {
   const handleConfirmDelete = async () => {
     if (selectedUser) {
       try {
-        const response = await axios.delete(
+        const response = await axios.patch(
           `${process.env.NEXT_PUBLIC_API_ENDPOINT_USERS}/${selectedUser.id}`,
           {
-            method: 'DELETE',
+            status: 'disable',
+          },
+          {
             headers: {
               'Content-Type': 'application/json',
             },

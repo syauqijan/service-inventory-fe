@@ -27,19 +27,24 @@ const Page = () => {
     const searchParams = useSearchParams();
     const serviceId = searchParams.get('id');
     const router = useRouter();
-    const [isChecked, setIsChecked] = useState(false)
-    const [isChecked2, setIsChecked2] = useState(false)
-    const userId = user?.userId;
+
+    const [isChecked, setIsChecked] = useState(false);
+    const [isChecked2, setIsChecked2] = useState(false);
+    const [isCheckedService, setIsCheckedService] = useState(false);
+    
     const [gitlabUrl, setGitlabUrl] = useState<string>('');
     const [name, setName] = useState<string>('');
     const [versionService, setversionService] = useState<string>('');
     const [description, setDescription] = useState<string>('');
     const [preprodUrl, setPreprodUrl] = useState<string>('');
     const [preprodUrlStatus, setPreprodUrlStatus] = useState<string>('inactive');
+    const [status, setStatus] = useState<string>('inactive');
     const [prodUrl, setProdUrl] = useState<string>('');
     const [prodUrlStatus, setProdUrlStatus] = useState<string>('inactive');
     const [errors, setErrors] = useState<ValidationErrors>({});
     const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    const userId = user?.userId;
 
     const setPrevData = (data: any) => {
         setName(data.name);
@@ -50,8 +55,10 @@ const Page = () => {
         setPreprodUrlStatus(data.preprodUrlStatus);
         setProdUrl(data.prodUrl);
         setProdUrlStatus(data.prodUrlStatus);
+        setStatus(data.status);
         setIsChecked(data.preprodUrlStatus === 'active');
         setIsChecked2(data.prodUrlStatus === 'active');
+        setIsCheckedService(data.status === 'active');
     }
 
     useEffect(() => {
@@ -116,11 +123,12 @@ const Page = () => {
                     prodUrl,
                     prodUrlStatus,
                     userId,
-                    versionService
+                    versionService,
+                    status
                 });
 
                 if (response.status === 200) {
-                    router.push('/dashboard/service');
+                    router.push(`/dashboard/service/service-web/view-service?id=${serviceId}`);
                     toast.success('Service updated successfully');
                 }
             } catch (error) {
@@ -152,8 +160,17 @@ const Page = () => {
         });
     }
 
+    const handleStatus = () => {
+        setIsCheckedService(prevState => {
+            const newState = !prevState;
+            setStatus(newState ? 'active' : 'inactive');
+            console.log('Service status set to:', newState ? 'active' : 'inactive'); // Debugging output
+            return newState;
+        });
+    }
+
     return (
-        <div className='flex max-h-screen overflow-y-auto '>
+        <div className='flex max-h-screen'>
             <div className="flex-1 space-y-4 p-4 md:p-8">
                 <Breadcrumbs items={breadcrumbItems} />
                 <div className="flex items-start justify-between">
@@ -189,6 +206,23 @@ const Page = () => {
                                 placeholder="Enter link" className="emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-4/5" required />
                             {errors.gitlabUrl && <p className="text-red-500  text-sm font-normal pt-1 pl-1">{errors.gitlabUrl}</p>}
                         </div>
+
+                        <div className='w-2/5 mt-3'>
+                            <h3 className='font-medium mb-1'>Service Status</h3>
+                            <label className='autoSaverSwitch relative inline-flex cursor-pointer select-none items-center'>
+                                <input type='checkbox' name='autoSaver' className='sr-only' checked={isCheckedService} onChange={handleStatus} />
+                                <span className={`w-11 h-6 slider mr-3 flex h-[24px] w-[50px] items-center rounded-full p-1 duration-200 ${isCheckedService ? 'bg-slate/900' : 'bg-[#CCCCCE]'}`}>
+                                    <span className={`dot h-[18px] w-[18px] rounded-full bg-white duration-200 ${isCheckedService ? 'translate-x-6' : ''}`}>
+                                    </span>
+                                </span>
+                                <span className='label flex items-center text-sm font-medium text-black'>
+                                    <span className='pl-1'>
+                                        {isCheckedService ? 'Active' : 'Inactive'}
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+
                         <div className='mt-3 flex justify-center w-1/2'>
                             <div className='w-4/5'>
                                 <h3 className='font-medium mb-1'>Pre-Prod URL</h3>
@@ -209,8 +243,7 @@ const Page = () => {
                                     </span>
                                     <span className='label flex items-center text-sm font-medium text-black'>
                                         <span className='pl-1'>
-                                            <input type='text' id='preprodUrlStatus' value={isChecked ? 'Active' : 'Inactive'} onChange={(e) => setPreprodUrlStatus(e.target.value)}>
-                                            </input>
+                                            {isChecked ? 'Active' : 'Inactive'}
                                         </span>
                                     </span>
                                 </label>
@@ -236,16 +269,15 @@ const Page = () => {
                                     </span>
                                     <span className='label flex items-center text-sm font-medium text-black'>
                                         <span className='pl-1'>
-                                            <input type='text' id='prodUrlStatus' value={isChecked2 ? 'Active' : 'Inactive'} onChange={(e) => setProdUrlStatus(e.target.value)}>
-                                            </input>
+                                            {isChecked2 ? 'Active' : 'Inactive'}
                                         </span>
                                     </span>
                                 </label>
                             </div>
                         </div>
-                        <div className='mt-8 flex justify-between pr-16'>
-                            <p className='active:scale-95 min-w-16 form-flex justify-center items-center py-3 px-4 gap-2 cursor-pointer rounded-md shadow-sm text-red-600 bg-white border border-red-600 w-20 mt-3 mb-1 ml-3 font-semibold text-center' onClick={() => router.back()}>Cancel</p>
-                            <input type="submit" value="Save" disabled={isLoading} className="active:scale-95 min-w-16 form-flex justify-center items-center border py-3 px-4 gap-2 cursor-pointer rounded-md shadow-sm text-white bg-red-600 w-20 mt-3 mb-1 ml-3 font-semibold"
+                        <div className='mt-8 flex justify-between pr-16 h-20'>
+                            <p className='active:scale-95 min-w-16 h-12 form-flex justify-center items-center py-3 px-4 gap-2 cursor-pointer rounded-md shadow-sm text-red-600 bg-white border border-red-600 w-20 mt-3 mb-1 ml-3 font-semibold text-center' onClick={() => router.back()}>Cancel</p>
+                            <input type="submit" value="Save" disabled={isLoading} className="active:scale-95 h-12 min-w-16 form-flex justify-center items-center border py-3 px-4 gap-2 cursor-pointer rounded-md shadow-sm text-white bg-red-600 w-20 mt-3 mb-1 ml-3 font-semibold"
                             />
                         </div>
                     </form>
@@ -254,4 +286,5 @@ const Page = () => {
         </div>
     );
 }
+
 export default Page;

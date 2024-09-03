@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import DataTableComponent from './DataTableComponent'; // Sesuaikan path sesuai dengan struktur proyek Anda
-import DetailModal from '@/components/modal/DetailModal'; // Sesuaikan path sesuai dengan struktur proyek Anda
+import DetailModal from '@/components/modal/API-detail-modal'; // Sesuaikan path sesuai dengan struktur proyek Anda
 import { DataRow, ApiDetails } from './types';
 
 interface ServiceAPIPageProps {

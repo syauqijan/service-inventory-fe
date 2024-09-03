@@ -17,6 +17,7 @@ import { ApiServiceTable } from '@/components/tables/service-api-tables/service-
 import axios from 'axios';
 import { AlertModal } from '@/components/modal/alert-modal';
 import { AlertModalApi } from '@/components/modal/alert-api-modal';
+import useAuth from '@/hooks/useAuth';
 
 const breadcrumbItems = [
     { title: 'Main', link: '/dashboard' },
@@ -33,9 +34,12 @@ export interface ServiceApi {
     id: string;
     name: string;
     gitlabUrl: string;
+    sonarQubeId: string;
+    unitTestingId: string;
 }
 
 const Page = () => {
+    const { user } = useAuth();
     const [data, setData] = useState<Service[]>([]);
     const [dataApi, setDataApi] = useState<ServiceApi[]>([]);
     const [error, setError] = useState<string | null>(null);
@@ -54,6 +58,9 @@ const Page = () => {
     const [openApi, setOpenApi] = useState(false);
     const [serviceId, setServiceId] = useState<string | null>(null);
 
+    const [sonarqubeId, setSonarqubeID] = useState<string | null>(null);
+    const [unitTestingId, setUnitTestingID] = useState<string | null>(null);
+
     const handleDeleteService = async (service: any) => {
         setServiceId(service.id);
         setOpen(true);
@@ -61,6 +68,8 @@ const Page = () => {
 
     const handleDeleteServiceApi = async (serviceApi: any) => {
         setServiceId(serviceApi.id);
+        setSonarqubeID(serviceApi.sonarQubeId);
+        setUnitTestingID(serviceApi.unitTestingId);
         setOpenApi(true);
     };
 
@@ -88,6 +97,9 @@ const Page = () => {
                     'Content-Type': 'application/json',
                 },
             });
+
+            const userRoleID = await axios.get(`${process.env.NEXT_PUBLIC_API_ENDPOINT_USERS}/${user?.userId}`);
+            const userRole = response.data;
 
             setData(response.data.services);
             setTotalServices(response.data.total);
@@ -143,18 +155,27 @@ const Page = () => {
         }
     };
 
-    const deleteSelectedServiceApi = async (serviceId: string) => {
-        console.log('Selected ID:', serviceId);
+    const deleteSelectedServiceApi = async (unitTestingId: string, sonarqubeId: string) => {
+        console.log('Selected Unit Testing ID:', unitTestingId);
+        console.log('Selected Sonarqube ID:', sonarqubeId);
         try {
             const response = await axios.delete(
-                `${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICEAPIS}/${serviceId}`, {
+                `${process.env.NEXT_PUBLIC_API_ENDPOINT_UNITTESTING}/${unitTestingId}`, {
                     headers: {
                         'Content-Type': 'application/json',
                     },
                 }
             );
 
-            if (response.status === 200) {
+            const response2 = await axios.delete(
+                `${process.env.NEXT_PUBLIC_API_ENDPOINT_SONARQUBE}/${sonarqubeId}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+
+            if (response.status === 200 && response2.status === 200) {
                 toast.success('Api service deleted successfully');
                 fetchData();
             }
@@ -174,8 +195,9 @@ const Page = () => {
 
     const onConfirmApi = () => {
         if (serviceId) {
-            deleteSelectedServiceApi(serviceId);
-            setServiceId(null);
+            deleteSelectedServiceApi(unitTestingId || '', sonarqubeId || '');
+            setUnitTestingID(null);
+            setSonarqubeID(null);
         }
         setOpenApi(false);
     };
@@ -202,13 +224,13 @@ const Page = () => {
                         <TabsContent value="web">
                             <Link href={'/dashboard/service/service-web/create-service'}
                                 className="h-10 px-4 py-2 bg-RedTint/900 rounded-md justify-center items-center inline-flex text-white text-sm font-medium">
-                                <Plus className="mr-2 h-4 w-4" /> Add New Service Web
+                                <Plus className="mr-2 h-4 w-4" /> Add New {user?.userId}
                             </Link>
                         </TabsContent>
                         <TabsContent value="api">
                             <Link href={'/dashboard/service/service-api/create-serviceAPI'}
                                 className="ml-4 h-10 px-4 py-2 bg-RedTint/900 rounded-md justify-center items-center inline-flex text-white text-sm font-medium">
-                                <Plus className="mr-2 h-4 w-4" /> Add New Service API
+                                <Plus className="mr-2 h-4 w-4" /> Add New
                             </Link>
                         </TabsContent>
                     </div>

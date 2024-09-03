@@ -29,6 +29,22 @@ export async function middleware(req: NextRequest) {
                 return NextResponse.redirect(new URL("/dashboard", req.url));
             }
 
+            else if (req.nextUrl.pathname === '/dashboard/service/service-web/create-service' && userRole.roleId == 3) {
+                return NextResponse.redirect(new URL("/dashboard", req.url));
+            }
+
+            else if (req.nextUrl.pathname === '/dashboard/service/service-web/update-service' && userRole.roleId == 3) {
+                return NextResponse.redirect(new URL("/dashboard", req.url));
+            }
+
+            else if (req.nextUrl.pathname === '/dashboard/service/service-api/create-serviceAPI' && userRole.roleId == 3) {
+                return NextResponse.redirect(new URL("/dashboard", req.url));
+            }
+
+            else if (req.nextUrl.pathname === '/dashboard/service/service-api/update-serviceAPI' && userRole.roleId == 3) {
+                return NextResponse.redirect(new URL("/dashboard", req.url));
+            }
+
             return NextResponse.next();
             
         } catch (error) {
@@ -43,6 +59,15 @@ export async function middleware(req: NextRequest) {
 export const config = {
     matcher: [
         '/dashboard',
-        '/dashboard/user-management'
+        '/dashboard/user-management',
+        '/dashboard/service',
+        '/dashboard/service/service-web/create-service',
+        '/dashboard/service/service-web/update-service',
+        '/dashboard/service/service-web/view-service',
+        '/dashboard/service/service-api/create-serviceAPI',
+        '/dashboard/service/service-api/update-serviceAPI',
+        '/dashboard/service/service-api/view-serviceAPI',
+        '/dashboard/service/service-api/swagger-page',
+        '/dashboard/api'
     ],
 };

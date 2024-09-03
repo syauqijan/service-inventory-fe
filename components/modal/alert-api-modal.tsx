@@ -27,8 +27,8 @@ export const AlertModalApi: React.FC<AlertModalApiProps> = ({
 
     return (
         <Modal
-            title="Are you sure to delete this API service?"
-            description="This action cannot be undone and will delete the service data from the table."
+            title="Are you sure to delete Data?"
+            description="This action cannot be undone and will delete data from the table."
             isOpen={isOpenApi}
             onClose={onCloseApi}
         >

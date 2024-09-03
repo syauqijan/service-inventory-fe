@@ -69,15 +69,13 @@ const ServiceAPIPage: React.FC = () => {
 
     return (
         <div>
-            <div className="flex justify-start mb-5 mr-4 text-md">
-                <input 
-                    type="text"
-                    placeholder="Search API..."
-                    value={apiSearch}
-                    onChange={(e) => setApiSearch(e.target.value)}
-                    className="border px-3 py-2 rounded-lg text-sm"
-                />
-            </div>
+            <input 
+                type="text"
+                placeholder="Search API..."
+                value={apiSearch}
+                onChange={(e) => setApiSearch(e.target.value)}
+                className="border px-3 pb-2 pt-1.5 rounded-md text-sm w-full md:max-w-sm mb-4 shadow-sm"
+            />
             <DataTableComponent 
                 data={filteredApiData}
                 onDeleteClick={handleDeleteClick} // Gunakan handleDeleteClick

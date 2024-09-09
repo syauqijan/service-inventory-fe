@@ -14,29 +14,30 @@ const DataTable = dynamic(() => import('react-data-table-component'), {
 interface DataTableComponentProps {
     data: DataRow[];
     onDeleteClick: (id: string) => void;
+    roleId: number | null; // Tambahkan roleId sebagai prop
 }
 
-const DataTableComponent: React.FC<DataTableComponentProps> = ({ data, onDeleteClick }) => {
+const DataTableComponent: React.FC<DataTableComponentProps> = ({ data, onDeleteClick, roleId }) => {
     const columns: TableColumn<DataRow>[] = [
         { 
             name: 'Service Name', 
             selector: (row) => row.service_api?.name || 'N/A',
             sortable: true,
-            minWidth: '200px',
+            minWidth: '300px',
             cell: row => <div className="text-gray-800">{row.service_api?.name || 'N/A'}</div>,
         },
         { 
             name: 'Method', 
             selector: (row) => row.method || 'N/A', 
             sortable: true,
-            minWidth: '120px',
+            minWidth: '200px',
             cell: row => (<div className="text-gray-800">{row.method || 'N/A'}</div>),
         },
         { 
             name: 'Endpoint', 
             selector: (row) => row.endpoint || 'N/A', 
             sortable: true,
-            minWidth: '370px',
+            minWidth: '450px',
             cell: row => <div className="text-gray-800">{row.endpoint || 'N/A'}</div>,
         },
         { 
@@ -50,7 +51,7 @@ const DataTableComponent: React.FC<DataTableComponentProps> = ({ data, onDeleteC
             name: 'Platform', 
             selector: (row) => row.platform || 'N/A', 
             sortable: true,
-            minWidth: '100px',
+            minWidth: '200px',
             cell: row => <div className="text-gray-800 text-center">{row.platform || 'N/A'}</div>,
         },
         { 
@@ -61,9 +62,13 @@ const DataTableComponent: React.FC<DataTableComponentProps> = ({ data, onDeleteC
                 </span>
             ),
             minWidth: '100px',
-            center: true, // Mengatur teks dalam sel ke tengah
+            center: true, 
         },
-        {
+    ];
+
+    // Tambahkan kolom "Actions" hanya jika roleId bukan 3
+    if (roleId !== 3) {
+        columns.push({
             name: 'Actions',
             cell: (row) => (
                 <button onClick={() => onDeleteClick(row.id)}>
@@ -74,8 +79,8 @@ const DataTableComponent: React.FC<DataTableComponentProps> = ({ data, onDeleteC
             allowOverflow: true,
             button: true,
             minWidth: '100px',
-        }
-    ];
+        });
+    }
 
     return (
         <div className="rounded-md">

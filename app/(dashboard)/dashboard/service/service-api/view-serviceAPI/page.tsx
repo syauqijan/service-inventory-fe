@@ -167,10 +167,10 @@ const Page = () => {
                         </div>
                         <div className='mt-6'>
                             <h3 className='font-medium mb-1'>Gitlab URL</h3>
-                            <Link href={`${service.gitlabUrl}`} className='underline cursor-pointer font-normal flex w-fit text-blue-600'>
+                            <a href={service.gitlabUrl} target="_blank" className='underline cursor-pointer font-normal flex w-fit text-blue-600'>
                                 {service.gitlabUrl}
                                 <ArrowUpRight fontSize="1.5em" />
-                            </Link>
+                            </a>
                         </div>
                         <div className='mt-6'>
                             <h3 className='font-medium mb-1'>Swagger API</h3>

@@ -141,15 +141,15 @@ const Page = () => {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-
+    
         if (!validateForm()) {
             return;
         }
-
+    
         try {
             setIsLoading(true);
             const formData = new FormData(event.currentTarget);
-
+    
             const sonarQubeData = {
                 qualityGateStatus: formData.get('qualityGateStatus'),
                 vulnerabilities: formData.get('vulnerabilities'),
@@ -158,7 +158,7 @@ const Page = () => {
                 codesmell: formData.get('codesmell'),
                 duplication: formData.get('duplication')
             };
-
+    
             const sonarQubeResponse = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SONARQUBE}`, {
                 method: 'POST',
                 headers: {
@@ -166,18 +166,18 @@ const Page = () => {
                 },
                 body: JSON.stringify(sonarQubeData),
             });
-
+    
             if (!sonarQubeResponse.ok) {
                 throw new Error('Failed to save SonarQube data');
             }
-
+    
             const sonarQubeResult = await sonarQubeResponse.json();
             const sonarQubeId = sonarQubeResult.id;
-
+    
             if (!sonarQubeId) {
                 throw new Error('SonarQube ID is undefined');
             }
-
+    
             const unitTestingData = {
                 coverageStatement: formData.get('coverageStatement'),
                 coverageFunction: formData.get('coverageFunction'),
@@ -186,7 +186,7 @@ const Page = () => {
                 coverageLines: formData.get('coverageLines'),
                 testCaseFailed: formData.get('testCaseFailed')
             };
-
+    
             const unitTestingResponse = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT_UNITTESTING}`, {
                 method: 'POST',
                 headers: {
@@ -194,20 +194,20 @@ const Page = () => {
                 },
                 body: JSON.stringify(unitTestingData),
             });
-
+    
             if (!unitTestingResponse.ok) {
                 const errorMessage = await unitTestingResponse.text();
                 console.error('Unit Testing API Error:', unitTestingResponse.status, errorMessage);
                 throw new Error('Failed to save Unit Testing data');
             }
-
+    
             const unitTestingResult = await unitTestingResponse.json();
             const unitTestingId = unitTestingResult.id;
-
+    
             if (!unitTestingId) {
                 throw new Error('Unit Testing ID is undefined');
             }
-
+    
             const serviceApiData = {
                 name: formData.get('service_name'),
                 description: formData.get('description'),
@@ -220,7 +220,7 @@ const Page = () => {
                 ownerId: user?.userId,
                 createdBy: user?.userId,
             };
-
+    
             const serviceApiResponse = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT_SERVICEAPIS}`, {
                 method: 'POST',
                 headers: {
@@ -228,20 +228,24 @@ const Page = () => {
                 },
                 body: JSON.stringify(serviceApiData),
             });
-
+    
             if (!serviceApiResponse.ok) {
+                const errorData = await serviceApiResponse.json();  // Ambil data error dari respons
+                if (errorData.errors) {
+                    setErrors(errorData.errors);  // Update state errors dengan pesan dari backend
+                }
                 throw new Error('Failed to save service API data');
             }
-
+    
             const serviceApiResult = await serviceApiResponse.json();
             const serviceApiId = serviceApiResult.id;
-
+    
             if (!serviceApiId) {
                 throw new Error('Service API ID is undefined');
             }
-
+    
             console.log("Service API ID:", serviceApiId);
-
+    
             for (const api of rows) {
                 const apiData = {
                     service_api_id: serviceApiId,
@@ -252,9 +256,9 @@ const Page = () => {
                     version: api.version,
                     platform: api.platform,
                 };
-
+    
                 console.log("API Data to be sent:", apiData);
-
+    
                 const apiResponse = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT_APIS}`, {
                     method: 'POST',
                     headers: {
@@ -262,12 +266,12 @@ const Page = () => {
                     },
                     body: JSON.stringify(apiData),
                 });
-
+    
                 if (!apiResponse.ok) {
                     throw new Error('Failed to save API data');
                 }
             }
-
+    
             toast.success('Data saved successfully');
             router.push('/dashboard/service');
         } catch (error) {
@@ -277,7 +281,7 @@ const Page = () => {
             setIsLoading(false);
         }
     };
-
+    
     return (
         <div className='flex overflow-y-auto'>
             <div className="flex-1 space-y-4 p-4 md:p-8">

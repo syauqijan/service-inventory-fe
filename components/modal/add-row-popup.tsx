@@ -104,13 +104,19 @@ const AddRowPopup: React.FC<AddRowPopupProps> = ({
                     <div className='w-2/5 ml-4'>
                         <div>
                             <label className="block text-sm font-medium mb-1">Method</label>
-                            <input
-                                type="text"
+                            <select
                                 value={method}
                                 onChange={(e) => setMethod(e.target.value)}
-                                className="w-full p-2 border border-gray-300 rounded-md mt-1"
-                                placeholder="Enter method"
-                            />
+                                className={`w-full p-2 border rounded-md mt-1`}
+                            >
+                                <option value="" disabled>
+                                    Select Method
+                                </option>
+                                <option value="Create">Create</option>
+                                <option value="Read">Read</option>
+                                <option value="Update">Update</option>
+                                <option value="Delete">Delete</option>
+                            </select>
                         </div>
                         <div className='mt-3'>
                             <label className="block text-sm font-medium mb-1">Platform</label>

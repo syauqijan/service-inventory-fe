@@ -2,21 +2,24 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import DataTableComponent from './DataTableComponent';
-import { AlertModalApi } from '@/components/modal/alert-api-modal'; // Pastikan path sesuai dengan struktur proyek Anda
+import { AlertModalApi } from '@/components/modal/alert-api-modal';
 import { DataRow } from './types';
 import { toast } from "sonner";
+import useAuth from '@/hooks/useAuth'; // Pastikan hook ini tersedia atau sesuaikan dengan cara Anda mendapatkan user data
 
 const ServiceAPIPage: React.FC = () => {
+    const { user } = useAuth();
     const [apiData, setApiData] = useState<DataRow[]>([]);
     const [filteredApiData, setFilteredApiData] = useState<DataRow[]>([]);
     const [apiSearch, setApiSearch] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [selectedApiId, setSelectedApiId] = useState<string | null>(null);
+    const [roleId, setRoleId] = useState<number | null>(null); // State untuk menyimpan roleId
 
     const fetchAllServiceApiData = async () => {
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_ENDPOINT_APIS}?limit=100`);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_ENDPOINT_APIS}`);
             setApiData(response.data.api || []);
             setFilteredApiData(response.data.api || []);
         } catch (error) {
@@ -29,11 +32,25 @@ const ServiceAPIPage: React.FC = () => {
     }, []);
 
     useEffect(() => {
+        const fetchUserRole = async () => {
+            if (user?.userId) {
+                try {
+                    const userRoleResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_ENDPOINT_USERS}/${user.userId}`);
+                    setRoleId(userRoleResponse.data.roleId);
+                } catch (error) {
+                    console.error("Error fetching role ID:", error);
+                }
+            }
+        };
+
+        fetchUserRole();
+    }, [user]);
+
+    useEffect(() => {
         const filtered = apiData.filter(item => 
             item.service_api?.name.toLowerCase().includes(apiSearch.toLowerCase()) ||
             item.endpoint.toLowerCase().includes(apiSearch.toLowerCase()) ||
             item.method.toLowerCase().includes(apiSearch.toLowerCase()) ||
-            // item.description.toLowerCase().includes(apiSearch.toLowerCase()) ||
             item.version.toLowerCase().includes(apiSearch.toLowerCase()) ||
             item.platform.toLowerCase().includes(apiSearch.toLowerCase()) ||
             item.status.toLowerCase().includes(apiSearch.toLowerCase())
@@ -45,7 +62,6 @@ const ServiceAPIPage: React.FC = () => {
         setSelectedApiId(id);
         setModalOpen(true);
     };
-
 
     const handleConfirmDelete = async () => {
         if (!selectedApiId) return;
@@ -76,10 +92,13 @@ const ServiceAPIPage: React.FC = () => {
                 onChange={(e) => setApiSearch(e.target.value)}
                 className="border px-3 pb-2 pt-1.5 rounded-md text-sm w-full md:max-w-sm mb-4 shadow-sm"
             />
-            <DataTableComponent 
-                data={filteredApiData}
-                onDeleteClick={handleDeleteClick} // Gunakan handleDeleteClick
-            />
+            {roleId !== null && (
+                <DataTableComponent 
+                    data={filteredApiData}
+                    onDeleteClick={handleDeleteClick}
+                    roleId={roleId} // Pass roleId sebagai prop
+                />
+            )}
             <AlertModalApi 
                 isOpenApi={modalOpen}
                 onCloseApi={() => setModalOpen(false)}

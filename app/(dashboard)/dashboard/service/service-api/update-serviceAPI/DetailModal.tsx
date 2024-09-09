@@ -134,13 +134,19 @@ const DetailModal: React.FC<DetailModalProps> = ({ isOpen, onClose, detailData, 
                     <div className="w-2/5 ml-4">
                         <div>
                             <label className="block text-sm font-medium mb-1">Method</label>
-                            <input
-                                type="text"
+                            <select
                                 value={method}
                                 onChange={(e) => setMethod(e.target.value)}
                                 className={`w-full p-2 border ${errors.method ? 'border-red-500' : 'border-gray-300'} rounded-md mt-1`}
-                                placeholder="Enter method"
-                            />
+                            >
+                                <option value="" disabled>
+                                    Select Method
+                                </option>
+                                <option value="Create">Create</option>
+                                <option value="Read">Read</option>
+                                <option value="Update">Update</option>
+                                <option value="Delete">Delete</option>
+                            </select>
                             {errors.method && <p className="text-red-500 text-sm">{errors.method}</p>}
                         </div>
                         <div className="mt-3">

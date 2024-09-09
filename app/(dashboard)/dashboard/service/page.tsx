@@ -42,8 +42,9 @@ const Page = () => {
     const { user } = useAuth();
     const [data, setData] = useState<Service[]>([]);
     const [dataApi, setDataApi] = useState<ServiceApi[]>([]);
+    const [roleId, setRoleId] = useState<number | null>(null); // State untuk menyimpan roleId
     const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(true); // State loading
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [totalServices, setTotalServices] = useState<number>(0);
     const [totalServiceApi, setTotalServiceApi] = useState<number>(0);
@@ -81,9 +82,6 @@ const Page = () => {
         router.push(`/dashboard/service/service-api/update-serviceAPI?id=${service.id}`);
     };
 
-    const columns = getColumns(handleDeleteService, handleUpdateService);
-    const columnsApi = getColumnsApi(handleDeleteServiceApi, handleUpdateServiceApi);
-
     const fetchData = async () => {
         setLoading(true);
         try {
@@ -98,8 +96,13 @@ const Page = () => {
                 },
             });
 
-            const userRoleID = await axios.get(`${process.env.NEXT_PUBLIC_API_ENDPOINT_USERS}/${user?.userId}`);
-            const userRole = response.data;
+            if (user?.userId) {
+                const userRoleResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_ENDPOINT_USERS}/${user.userId}`);
+                console.log("User Role Response:", userRoleResponse.data);  // Debugging
+                setRoleId(userRoleResponse.data.roleId); // Simpan roleId ke dalam state
+            } else {
+                console.warn("User ID is not available");
+            }
 
             setData(response.data.services);
             setTotalServices(response.data.total);
@@ -125,14 +128,17 @@ const Page = () => {
                 console.error('Error fetching service APIs:', error);
                 setError('An error occurred while fetching service APIs');
             } finally {
-                setLoading(false);
+                setLoading(false); // Pastikan loading selesai
             }
         }
     };
 
+    const columns = getColumns(handleDeleteService, handleUpdateService, roleId);
+    const columnsApi = getColumnsApi(handleDeleteServiceApi, handleUpdateServiceApi, roleId);
+
     useEffect(() => {
         fetchData();
-    }, [debouncedSearchTerm, page, limit]);
+    }, [debouncedSearchTerm, page, limit, user]);
 
     const deleteSelectedServices = async (serviceId: string) => {
         console.log('Selected ID:', serviceId);
@@ -222,16 +228,20 @@ const Page = () => {
                     <Heading title="Service" description="Create and manage services" />
                     <div>
                         <TabsContent value="web">
-                            <Link href={'/dashboard/service/service-web/create-service'}
-                                className="h-10 px-4 py-2 bg-RedTint/900 rounded-md justify-center items-center inline-flex text-white text-sm font-medium">
-                                <Plus className="mr-2 h-4 w-4" /> Add New {user?.userId}
-                            </Link>
+                            {roleId !== null && roleId !== 3 && (
+                                <Link href={'/dashboard/service/service-web/create-service'}
+                                    className="h-10 px-4 py-2 bg-RedTint/900 rounded-md justify-center items-center inline-flex text-white text-sm font-medium">
+                                    <Plus className="mr-2 h-4 w-4" /> Add New
+                                </Link>
+                            )}
                         </TabsContent>
                         <TabsContent value="api">
-                            <Link href={'/dashboard/service/service-api/create-serviceAPI'}
-                                className="ml-4 h-10 px-4 py-2 bg-RedTint/900 rounded-md justify-center items-center inline-flex text-white text-sm font-medium">
-                                <Plus className="mr-2 h-4 w-4" /> Add New
-                            </Link>
+                            {roleId !== null && roleId !== 3 && (
+                                <Link href={'/dashboard/service/service-api/create-serviceAPI'}
+                                    className="ml-4 h-10 px-4 py-2 bg-RedTint/900 rounded-md justify-center items-center inline-flex text-white text-sm font-medium">
+                                    <Plus className="mr-2 h-4 w-4" /> Add New
+                                </Link>
+                            )}
                         </TabsContent>
                     </div>
                 </div>

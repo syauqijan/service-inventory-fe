@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 interface FormState {
     versionService: string;
@@ -29,13 +29,13 @@ interface FormState {
         bugs: string;
         vulnerabilities: string;
         codesmell: string;
-        coverage: string;  // Pastikan ini adalah string
+        coverage: string;  
         duplication: string;
-    }
+    };
     user: {
         id: string;
         name: string;
-    }
+    };
 }
 
 interface EditServiceFormProps {
@@ -47,6 +47,7 @@ interface EditServiceFormProps {
 
 const EditServiceForm: React.FC<EditServiceFormProps> = ({ initialData, onSubmit, yamlSpec, onYamlSpecChange }) => {
     const [formState, setFormState] = useState<FormState>(initialData);
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});  // State untuk menyimpan error
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -64,9 +65,9 @@ const EditServiceForm: React.FC<EditServiceFormProps> = ({ initialData, onSubmit
                 ...prevState,
                 [firstKey]: {
                     ...(prevState[firstKey] as object),
-                    [keys[1]]: keys[1].includes('testCase') || keys[1].includes('coverage') && keys[1] !== 'coverage' // Only convert if it's a numeric field, and not `sonarqube.coverage`
+                    [keys[1]]: keys[1].includes('testCase') || keys[1].includes('coverage') && keys[1] !== 'coverage'
                         ? Number(value)
-                        : value, // Keep the string as is
+                        : value,
                 },
             }));
         }
@@ -79,16 +80,36 @@ const EditServiceForm: React.FC<EditServiceFormProps> = ({ initialData, onSubmit
         }));
     };
 
+    // Fungsi validasi
+    const validateForm = () => {
+        let formErrors: { [key: string]: string } = {};
+
+        // Contoh validasi untuk memastikan beberapa field tidak kosong
+        if (!formState.name) formErrors.name = "Service Name is required";
+        if (!formState.description) formErrors.description = "Description is required";
+        if (!formState.gitlabUrl) formErrors.gitlabUrl = "Gitlab URL is required";
+        if (!formState.versionService) formErrors.versionService = "Version is required";
+        if (!formState.sonarqube.qualityGateStatus) formErrors["sonarqube.qualityGateStatus"] = "Quality Gate Status is required";
+        if (!formState.unit_testing.testCasePassed) formErrors["unit_testing.testCasePassed"] = "Test Case Passed is required";
+
+        setErrors(formErrors);
+        return Object.keys(formErrors).length === 0;  // Jika tidak ada error, return true
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit({
-            ...formState,
-            yamlSpec, // Include the yamlSpec when submitting
-        });
+        if (validateForm()) {
+            // Jika validasi berhasil, submit form
+            onSubmit({
+                ...formState,
+                yamlSpec,
+            });
+        }
     };
-    
+
     return (
         <form onSubmit={handleSubmit} className='text-sm mb-7'>
+            {/* Input field dengan validasi */}
             <div className='w-1/2'>
                 <label className='font-medium'>Service Name</label><br />
                 <input
@@ -98,6 +119,7 @@ const EditServiceForm: React.FC<EditServiceFormProps> = ({ initialData, onSubmit
                     onChange={handleChange}
                     className='emailcustom placeholder:opacity-50 mt-1 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-2/3'
                 />
+                {errors.name && <p className='text-red-500'>{errors.name}</p>}  {/* Tampilkan error jika ada */}
             </div>
             <div className='mt-3'>
                 <label className='font-medium'>Description</label><br />
@@ -107,6 +129,7 @@ const EditServiceForm: React.FC<EditServiceFormProps> = ({ initialData, onSubmit
                     onChange={handleChange}
                     className='min-h-20 mt-1 max-h-20 emailcustom placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid focus:outline-none w-1/2'
                 />
+                {errors.description && <p className='text-red-500'>{errors.description}</p>}  {/* Tampilkan error jika ada */}
             </div>
             <div className='mt-3 w-1/2'>
                 <label className='font-medium'>Gitlab URL</label><br />
@@ -117,6 +140,7 @@ const EditServiceForm: React.FC<EditServiceFormProps> = ({ initialData, onSubmit
                     onChange={handleChange}
                     className='emailcustom placeholder:opacity-50 mt-1 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-2/3'
                 />
+                {errors.gitlabUrl && <p className='text-red-500'>{errors.gitlabUrl}</p>}  {/* Tampilkan error jika ada */}
             </div>
             <div className='w-1/2 mt-3'>
                 <label className='font-medium'>Yaml Spec</label><br />
@@ -142,6 +166,7 @@ const EditServiceForm: React.FC<EditServiceFormProps> = ({ initialData, onSubmit
                     onChange={handleChange}
                     className='emailcustom placeholder:opacity-50 mt-1 py-3 px-4 rounded-md border-2 border-solid border-neutral-300 focus:outline-none w-2/3'
                 />
+                {errors.versionService && <p className='text-red-500'>{errors.versionService}</p>}  {/* Tampilkan error jika ada */}
             </div>
 
             {/* Toggle Switch */}
@@ -177,6 +202,7 @@ const EditServiceForm: React.FC<EditServiceFormProps> = ({ initialData, onSubmit
                                 onChange={handleChange}
                                 className='mt-1 placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid focus:outline-none w-full'
                             />
+                            {errors["sonarqube.qualityGateStatus"] && <p className='text-red-500'>{errors["sonarqube.qualityGateStatus"]}</p>}
                         </div>
                         <div className='mt-4'>
                             <label className='font-medium'>Bugs</label><br />
@@ -213,7 +239,7 @@ const EditServiceForm: React.FC<EditServiceFormProps> = ({ initialData, onSubmit
                         <div className='mt-4'>
                             <label className='font-medium'>Coverage</label><br />
                             <input
-                                type="text"  // Type is text to allow any input
+                                type="text"
                                 name="sonarqube.coverage"
                                 value={formState.sonarqube.coverage}
                                 onChange={handleChange}
@@ -249,6 +275,7 @@ const EditServiceForm: React.FC<EditServiceFormProps> = ({ initialData, onSubmit
                                 onChange={handleChange}
                                 className='mt-1 placeholder:opacity-50 py-3 px-4 rounded-md border-2 border-solid focus:outline-none w-full'
                             />
+                            {errors["unit_testing.testCasePassed"] && <p className='text-red-500'>{errors["unit_testing.testCasePassed"]}</p>}
                         </div>
                         <div className='mt-4'>
                             <label className='font-medium'>Test Case Failed</label><br />
@@ -305,6 +332,10 @@ const EditServiceForm: React.FC<EditServiceFormProps> = ({ initialData, onSubmit
                     </div>
                 </div>
             </div>
+
+            <button type="submit" className="mt-4 bg-blue-500 text-white py-2 px-4 rounded-md">
+                Submit
+            </button>
 
         </form>
     );
